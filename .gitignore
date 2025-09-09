@@ -1,0 +1,19 @@
+# VS Code
+*.code-workspace
+.vscode/
+
+# environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
