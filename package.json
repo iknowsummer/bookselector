@@ -1,0 +1,21 @@
+{
+  "name": "bookselector",
+  "version": "1.0.0",
+  "description": "readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "api-dev": "node scripts/fastapi-dev.js",
+    "open-api": "wait-on tcp:8000 && open-cli http://localhost:8000",
+    "open-api-doc": "wait-on tcp:8000 && open-cli http://localhost:8000/docs",
+    "dev": "concurrently \"npm run api-dev\" \"npm run open-api-doc\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "open": "^10.2.0",
+    "open-cli": "^8.0.0",
+    "wait-on": "^8.0.4"
+  }
+}
