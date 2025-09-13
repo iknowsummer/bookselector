@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends, Query, HTTPException, Body
+from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from database import Base, engine, SessionLocal
 from models import Book, Result
 import os
 from dotenv import load_dotenv
-
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 app = FastAPI()
@@ -64,6 +64,12 @@ def create_book(
 @app.get("/books/")
 def read_books(db: Session = Depends(get_db)):
     return db.query(Book).all()
+
+
+@app.get("/books/ids/")
+def get_books_by_ids(id: List[int] = Query(...), db: Session = Depends(get_db)):
+    books = db.query(Book).filter(Book.id.in_(id)).all()
+    return books
 
 
 # 配列指定のid書籍のis_pickedを1にするエンドポイント
