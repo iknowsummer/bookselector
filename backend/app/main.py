@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, Query, HTTPException, Body
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from database import Base, engine, SessionLocal
-from models import Book
+from models import Book, Result
 import os
 from dotenv import load_dotenv
 
@@ -89,3 +89,21 @@ def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     db.commit()
     db.refresh(book)
     return book
+
+
+# 結果を登録するエンドポイント
+@app.post("/results/")
+def create_result(
+    book_ids: list[int] = Body(...),
+    note: str = None,
+    db: Session = Depends(get_db),
+):
+    from datetime import datetime
+    import json
+
+    created_at = datetime.now().isoformat()
+    result = Result(book_ids=json.dumps(book_ids), note=note, created_at=created_at)
+    db.add(result)
+    db.commit()
+    db.refresh(result)
+    return result
