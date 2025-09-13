@@ -76,3 +76,16 @@ def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
         book.is_picked = 1
     db.commit()
     return books
+
+
+# 配列指定の書籍のis_pickedをNULLにするエンドポイント
+@app.post("/books/unpicked")
+def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
+    books = db.query(Book).filter(Book.id.in_(ids)).all()
+    if not books:
+        raise HTTPException(status_code=404, detail="Books not found")
+    for book in books:
+        book.is_picked = None
+    db.commit()
+    db.refresh(book)
+    return book
