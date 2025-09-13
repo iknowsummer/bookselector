@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, HTTPException, Body
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from database import Base, engine, SessionLocal
@@ -64,3 +64,15 @@ def create_book(
 @app.get("/books/")
 def read_books(db: Session = Depends(get_db)):
     return db.query(Book).all()
+
+
+# 配列指定のid書籍のis_pickedを1にするエンドポイント
+@app.post("/books/picked")
+def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
+    books = db.query(Book).filter(Book.id.in_(ids)).all()
+    if not books:
+        raise HTTPException(status_code=404, detail="Books not found")
+    for book in books:
+        book.is_picked = 1
+    db.commit()
+    return books
