@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, JSON
 from database import Base
 
 
@@ -13,3 +13,12 @@ class Book(Base):
     isbn = Column(String, index=True, nullable=True)
     note = Column(String, index=True, nullable=True)
     is_picked = Column(Integer, default=0)
+
+
+class Result(Base):
+    __tablename__ = "results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    book_ids = Column(JSON, nullable=False)
+    note = Column(String, index=True, nullable=True)
+    created_at = Column(String, index=True, nullable=False)
