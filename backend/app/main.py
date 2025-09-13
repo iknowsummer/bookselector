@@ -113,3 +113,9 @@ def create_result(
     db.commit()
     db.refresh(result)
     return result
+
+
+# 結果を取得するエンドポイント
+@app.get("/results/")
+def read_results(db: Session = Depends(get_db)):
+    return db.query(Result).all()
