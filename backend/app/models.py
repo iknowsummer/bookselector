@@ -1,0 +1,24 @@
+from sqlalchemy import Column, Integer, String, JSON
+from database import Base
+
+
+class Book(Base):
+    __tablename__ = "books"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True, nullable=False)
+    author = Column(String, index=True, nullable=False)
+    description = Column(String, index=True, nullable=True)
+    age = Column(String, index=True, nullable=True)
+    isbn = Column(String, index=True, nullable=True)
+    note = Column(String, index=True, nullable=True)
+    is_picked = Column(Integer, default=0)
+
+
+class Result(Base):
+    __tablename__ = "results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    book_ids = Column(JSON, nullable=False)
+    note = Column(String, index=True, nullable=True)
+    created_at = Column(String, index=True, nullable=False)
