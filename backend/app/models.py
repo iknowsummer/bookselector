@@ -11,6 +11,7 @@ class Book(Base):
     description = Column(String, index=True, nullable=True)
     age = Column(String, index=True, nullable=True)
     isbn = Column(String, index=True, nullable=True)
+    image_url = Column(String, index=True, nullable=True)
     note = Column(String, index=True, nullable=True)
     is_picked = Column(Integer, default=0)
 
