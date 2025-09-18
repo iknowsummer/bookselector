@@ -6,9 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "api-dev": "node scripts/fastapi-dev.js",
+    "next-dev": "node scripts/next-dev.js",
+    "next-open": "wait-on tcp:3000 tcp:8000 && open-cli http://localhost:3000/",
     "open-api": "wait-on tcp:8000 && open-cli http://localhost:8000",
     "open-api-doc": "wait-on tcp:8000 && open-cli http://localhost:8000/docs",
-    "dev": "concurrently \"npm run api-dev\" \"npm run open-api-doc\""
+    "dev": "concurrently \"npm run api-dev\" \"npm run next-dev\" \"npm run next-open\" \"npm run open-api-doc\""
   },
   "author": "",
   "license": "ISC",
