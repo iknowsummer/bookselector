@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from typing import List
@@ -9,6 +8,7 @@ from sqlalchemy.sql.expression import func
 
 from database import get_db
 from models import Book, Result
+from schemas import BookCreate, BookRead, ResultCreate, ResultRead
 
 router = APIRouter()
 
@@ -18,49 +18,44 @@ def root():
     return {"message": "Hello, FastAPI!"}
 
 
-@router.get("/books/pick/")
+@router.get("/books/pick/", response_model=List[BookRead])
 def pick_books(
     db: Session = Depends(get_db),
     include_picked: int = Query(0, description="1でis_picked=1も含める。"),
 ):
     pickcount = int(os.getenv("PICKCOUNT", 4))
-
     if include_picked == 0:
         query = db.query(Book).filter(Book.is_picked != 1)
     else:
         query = db.query(Book)
-
     books = query.order_by(func.random()).limit(pickcount).all()
     return books
 
 
-@router.post("/books/")
+@router.post("/books/", response_model=BookRead)
 def create_book(
-    title: str,
-    author: str,
-    description: str = None,
-    note: str = None,
+    book: BookCreate,
     db: Session = Depends(get_db),
 ):
-    book = Book(title=title, author=author, description=description, note=note)
-    db.add(book)
+    db_book = Book(**book.dict())
+    db.add(db_book)
     db.commit()
-    db.refresh(book)
-    return book
+    db.refresh(db_book)
+    return db_book
 
 
-@router.get("/books/")
+@router.get("/books/", response_model=List[BookRead])
 def read_books(db: Session = Depends(get_db)):
     return db.query(Book).all()
 
 
-@router.get("/books/ids/")
+@router.get("/books/ids/", response_model=List[BookRead])
 def get_books_by_ids(id: List[int] = Query(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(id)).all()
     return books
 
 
-@router.post("/books/picked")
+@router.post("/books/picked", response_model=List[BookRead])
 def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
@@ -71,7 +66,7 @@ def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     return books
 
 
-@router.post("/books/unpicked")
+@router.post("/books/unpicked", response_model=List[BookRead])
 def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
@@ -79,24 +74,25 @@ def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     for book in books:
         book.is_picked = None
     db.commit()
-    db.refresh(book)
-    return book
+    return books
 
 
-@router.post("/results/")
+@router.post("/results/", response_model=ResultRead)
 def create_result(
-    book_ids: list[int] = Body(...),
-    note: str = None,
+    result: ResultCreate,
     db: Session = Depends(get_db),
 ):
-    created_at = datetime.now().isoformat()
-    result = Result(book_ids=json.dumps(book_ids), note=note, created_at=created_at)
-    db.add(result)
+    db_result = Result(
+        book_ids=result.book_ids,
+        note=result.note,
+        created_at=datetime.now().isoformat(),
+    )
+    db.add(db_result)
     db.commit()
-    db.refresh(result)
-    return result
+    db.refresh(db_result)
+    return db_result
 
 
-@router.get("/results/")
+@router.get("/results/", response_model=List[ResultRead])
 def read_results(db: Session = Depends(get_db)):
     return db.query(Result).all()
