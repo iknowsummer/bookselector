@@ -71,7 +71,7 @@ def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     if not books:
         raise HTTPException(status_code=404, detail="Books not found")
     for book in books:
-        book.is_picked = None
+        book.is_picked = 0
     db.commit()
     return books
 
