@@ -17,8 +17,8 @@ def root():
     return {"message": "Hello, FastAPI!"}
 
 
-@router.get("/books/pick/", response_model=list[BookRead])
-def pick_books(
+@router.get("/books/random", response_model=list[BookRead])
+def random_books(
     db: Session = Depends(get_db),
     include_picked: int = Query(0, description="1でis_picked=1も含める。"),
 ):
