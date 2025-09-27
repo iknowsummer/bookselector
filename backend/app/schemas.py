@@ -18,7 +18,7 @@ class BookCreate(BookBase):
 
 class BookRead(BookBase):
     id: int
-    is_picked: Optional[int] = None
+    is_picked: bool = False
 
     class Config:
         from_attributes = True
