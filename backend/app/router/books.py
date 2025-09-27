@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -18,7 +17,7 @@ def root():
     return {"message": "Hello, FastAPI!"}
 
 
-@router.get("/books/pick/", response_model=List[BookRead])
+@router.get("/books/pick/", response_model=list[BookRead])
 def pick_books(
     db: Session = Depends(get_db),
     include_picked: int = Query(0, description="1でis_picked=1も含める。"),
@@ -44,18 +43,18 @@ def create_book(
     return db_book
 
 
-@router.get("/books/", response_model=List[BookRead])
+@router.get("/books/", response_model=list[BookRead])
 def read_books(db: Session = Depends(get_db)):
     return db.query(Book).all()
 
 
-@router.get("/books/ids/", response_model=List[BookRead])
-def get_books_by_ids(id: List[int] = Query(...), db: Session = Depends(get_db)):
+@router.get("/books/ids/", response_model=list[BookRead])
+def get_books_by_ids(id: list[int] = Query(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(id)).all()
     return books
 
 
-@router.post("/books/picked", response_model=List[BookRead])
+@router.post("/books/picked", response_model=list[BookRead])
 def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
@@ -66,7 +65,7 @@ def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     return books
 
 
-@router.post("/books/unpicked", response_model=List[BookRead])
+@router.post("/books/unpicked", response_model=list[BookRead])
 def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
@@ -93,6 +92,6 @@ def create_result(
     return db_result
 
 
-@router.get("/results/", response_model=List[ResultRead])
+@router.get("/results/", response_model=list[ResultRead])
 def read_results(db: Session = Depends(get_db)):
     return db.query(Result).all()
