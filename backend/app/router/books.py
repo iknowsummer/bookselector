@@ -44,13 +44,11 @@ def create_book(
 
 
 @router.get("/books/", response_model=list[BookRead])
-def read_books(db: Session = Depends(get_db)):
-    return db.query(Book).all()
-
-
-@router.get("/books/ids/", response_model=list[BookRead])
-def get_books_by_ids(id: list[int] = Query(...), db: Session = Depends(get_db)):
-    books = db.query(Book).filter(Book.id.in_(id)).all()
+def read_books(id: list[int] = Query(None), db: Session = Depends(get_db)):
+    if id:
+        books = db.query(Book).filter(Book.id.in_(id)).all()
+    else:
+        books = db.query(Book).all()
     return books
 
 
