@@ -22,7 +22,7 @@ def pick_books(
     db: Session = Depends(get_db),
     include_picked: int = Query(0, description="1でis_picked=1も含める。"),
 ):
-    pickcount = int(os.getenv("PICKCOUNT", 4))
+    pickcount = int(os.getenv("PICKCOUNT", "4"))
     if include_picked == 0:
         query = db.query(Book).filter(Book.is_picked != 1)
     else:
