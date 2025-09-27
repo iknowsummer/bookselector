@@ -2,12 +2,13 @@ import os
 from datetime import datetime
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 
-from database import get_db
-from models import Book, Result
-from schemas import BookCreate, BookRead, ResultCreate, ResultRead
+from ..database import get_db
+from ..models import Book, Result
+from ..schemas import BookCreate, BookRead, ResultCreate, ResultRead
 
 router = APIRouter()
 
@@ -38,8 +39,12 @@ def create_book(
 ):
     db_book = Book(**book.dict())
     db.add(db_book)
-    db.commit()
-    db.refresh(db_book)
+    try:
+        db.commit()
+        db.refresh(db_book)
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="書籍の登録中にエラーが発生しました。") from exc
     return db_book
 
 
@@ -55,15 +60,19 @@ def read_books(id: list[int] = Query(None), db: Session = Depends(get_db)):
 @router.patch("/books/picked", response_model=list[BookRead])
 def update_books_picked(
     ids: list[int] = Body(...),
-    is_picked: int = Body(..., embed=True),  # 1: picked, 0: unpicked
+    is_picked: int = Body(..., embed=True),  # 1: 選出済み、0: 未選出
     db: Session = Depends(get_db),
 ):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
-        raise HTTPException(status_code=404, detail="Books not found")
+        raise HTTPException(status_code=404, detail="指定した書籍が見つかりません。")
     for book in books:
         book.is_picked = is_picked
-    db.commit()
+    try:
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="書籍の更新中にエラーが発生しました。") from exc
     return books
 
 
@@ -78,8 +87,12 @@ def create_result(
         created_at=datetime.now().isoformat(),
     )
     db.add(db_result)
-    db.commit()
-    db.refresh(db_result)
+    try:
+        db.commit()
+        db.refresh(db_result)
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="結果の登録中にエラーが発生しました。") from exc
     return db_result
 
 
