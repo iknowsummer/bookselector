@@ -54,24 +54,17 @@ def get_books_by_ids(id: list[int] = Query(...), db: Session = Depends(get_db)):
     return books
 
 
-@router.post("/books/picked", response_model=list[BookRead])
-def update_is_picked(ids: list[int] = Body(...), db: Session = Depends(get_db)):
+@router.patch("/books/picked", response_model=list[BookRead])
+def update_books_picked(
+    ids: list[int] = Body(...),
+    is_picked: int = Body(..., embed=True),  # 1: picked, 0: unpicked
+    db: Session = Depends(get_db),
+):
     books = db.query(Book).filter(Book.id.in_(ids)).all()
     if not books:
         raise HTTPException(status_code=404, detail="Books not found")
     for book in books:
-        book.is_picked = 1
-    db.commit()
-    return books
-
-
-@router.post("/books/unpicked", response_model=list[BookRead])
-def unpick_book(ids: list[int] = Body(...), db: Session = Depends(get_db)):
-    books = db.query(Book).filter(Book.id.in_(ids)).all()
-    if not books:
-        raise HTTPException(status_code=404, detail="Books not found")
-    for book in books:
-        book.is_picked = 0
+        book.is_picked = is_picked
     db.commit()
     return books
 
