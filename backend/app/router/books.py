@@ -209,3 +209,17 @@ def read_results(db: Session = Depends(get_db)):
         raise handle_database_error(exc, "results retrieval") from exc
     except Exception as exc:
         raise handle_internal_error(exc, "results retrieval") from exc
+
+
+@router.delete("/results/")
+def delete_all_results(db: Session = Depends(get_db)):
+    try:
+        deleted_count = db.query(Result).delete()
+        db.commit()
+        return {"deleted_count": deleted_count}
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc, "results deletion") from exc
+    except Exception as exc:
+        db.rollback()
+        raise handle_internal_error(exc, "results deletion") from exc
