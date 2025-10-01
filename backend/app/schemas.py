@@ -6,7 +6,7 @@ class BookBase(BaseModel):
     title: str
     author: str | None = None
     description: str | None = None
-    age: str | None = None
+    target_age: str | None = None
     isbn: str | None = None
     image_url: str | None = None
     note: str | None = None
