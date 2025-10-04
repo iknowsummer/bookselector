@@ -17,8 +17,8 @@ from exceptions import (
 router = APIRouter()
 
 
-@router.get("/")
-def root():
+@router.get("/health")
+def health():
     return {"message": "Hello, FastAPI!"}
 
 
