@@ -1,4 +1,4 @@
-title,author,description,age,isbn,image_url,is_picked
+title,author,description,target_age,isbn,image_url,is_picked
 いないいないばあ,松谷みよ子,赤ちゃん向けの定番絵本。ページをめくると動物たちが「いないいないばあ」をしてくれる。,0〜2歳,9784494001019,http://books.google.com/books/content?id=IdLQtAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api,0
 はらぺこあおむし,エリック・カール,小さなあおむしが食べて大きくなり、最後には美しいちょうになる世界的ロングセラー。,2〜5歳,9784033211008,,0
 ぐりとぐら,なかがわりえこ,野ねずみのぐりとぐらが大きなたまごでカステラを作る楽しいお話。,3〜6歳,9784834017779,http://books.google.com/books/content?id=PIEeAgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api,0
