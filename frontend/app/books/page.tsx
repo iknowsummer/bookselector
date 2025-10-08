@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Book } from "@/types/book";
 import { fetchBooks } from "@/lib/api/books";
@@ -27,7 +28,12 @@ export default function Home() {
         <div>エラー: {error}</div>
       ) : (
         <div>
-          <h2>書籍一覧</h2>
+          <div className="header-with-button">
+            <h2>書籍一覧</h2>
+            <Link href="/books/new">
+              <button>新規登録</button>
+            </Link>
+          </div>
           <ul className="book-list">
             {books.map((book) => (
               <li key={book.id}>

@@ -30,3 +30,20 @@ export const fetchBooks = async (): Promise<Book[]> => {
   }
   return await res.json();
 };
+
+export const createBook = async (
+  bookData: Omit<Book, "id">
+): Promise<Book> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}/books`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(bookData),
+  });
+  if (!res.ok) {
+    throw new Error("書籍の登録に失敗しました");
+  }
+  return await res.json();
+};
