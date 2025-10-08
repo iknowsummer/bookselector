@@ -16,6 +16,10 @@ class BookCreate(BookBase):
     pass
 
 
+class BookUpdate(BookBase):
+    pass
+
+
 class BookRead(BookBase):
     id: int
     is_picked: bool = False

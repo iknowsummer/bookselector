@@ -103,6 +103,9 @@ export default function BookDetailPage() {
           <Link href="/books">
             <button>一覧に戻る</button>
           </Link>
+          <Link href={`/books/${book.id}/edit`}>
+            <button>編集</button>
+          </Link>
           <button
             onClick={handleDelete}
             disabled={isDeleting}

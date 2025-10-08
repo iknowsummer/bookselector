@@ -61,6 +61,24 @@ export const fetchBook = async (id: number): Promise<Book> => {
   return books[0];
 };
 
+export const updateBook = async (
+  id: number,
+  bookData: Omit<Book, "id">
+): Promise<Book> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}/books/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(bookData),
+  });
+  if (!res.ok) {
+    throw new Error("書籍の更新に失敗しました");
+  }
+  return await res.json();
+};
+
 export const deleteBook = async (id: number): Promise<void> => {
   const apiBaseUrl = getApiBaseUrl();
   const res = await fetch(`${apiBaseUrl}/books/${id}`, {
