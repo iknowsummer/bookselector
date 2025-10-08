@@ -47,3 +47,26 @@ export const createBook = async (
   }
   return await res.json();
 };
+
+export const fetchBook = async (id: number): Promise<Book> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}/books?id=${id}`);
+  if (!res.ok) {
+    throw new Error("書籍情報の取得に失敗しました");
+  }
+  const books = await res.json();
+  if (books.length === 0) {
+    throw new Error("書籍が見つかりません");
+  }
+  return books[0];
+};
+
+export const deleteBook = async (id: number): Promise<void> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}/books/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    throw new Error("書籍の削除に失敗しました");
+  }
+};

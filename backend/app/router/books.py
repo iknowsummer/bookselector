@@ -70,6 +70,26 @@ def read_books(id: list[int] = Query(None), db: Session = Depends(get_db)):
     return books
 
 
+@router.delete("/books/{id}")
+def delete_book(
+    id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        book = db.query(Book).filter(Book.id == id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="Book not found")
+
+        db.delete(book)
+        db.commit()
+        return {"message": "Book deleted successfully"}
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc, "book deletion") from exc
+
+
 @router.patch("/books/picked", response_model=list[BookRead])
 def update_books_picked(
     ids: list[int] = Body(...),
