@@ -62,11 +62,31 @@ def create_book(
 
 
 @router.get("/books/", response_model=list[BookRead])
-def read_books(id: list[int] = Query(None), db: Session = Depends(get_db)):
+def read_books(
+    id: list[int] = Query(None),
+    limit: int | None = Query(None, description="取得件数の上限"),
+    order_by: str = Query("created_at", description="ソート対象のフィールド"),
+    order: str = Query("desc", description="ソート順序 (desc or asc)"),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Book)
+
+    # IDフィルター
     if id is not None:
-        books = db.query(Book).filter(Book.id.in_(id)).all()
+        query = query.filter(Book.id.in_(id))
+
+    # ソート処理
+    order_column = getattr(Book, order_by, Book.created_at)
+    if order.lower() == "desc":
+        query = query.order_by(order_column.desc())
     else:
-        books = db.query(Book).all()
+        query = query.order_by(order_column.asc())
+
+    # 件数制限
+    if limit is not None:
+        query = query.limit(limit)
+
+    books = query.all()
     return books
 
 
