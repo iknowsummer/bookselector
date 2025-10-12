@@ -2,6 +2,9 @@
 *.code-workspace
 .vscode/
 
+.claude/
+CLAUDE.md
+
 # environment
 .env
 
