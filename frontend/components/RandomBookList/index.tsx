@@ -21,9 +21,6 @@ export default function RandomBookList({
     try {
       const data = await fetchRandomBooks();
       setBooks(data);
-      if (data.length === 0) {
-        setError("取得できる書籍情報がありませんでした");
-      }
     } catch (err) {
       setBooks([]);
       setError(`書籍情報の取得に失敗しました: ${err}`);
@@ -38,13 +35,7 @@ export default function RandomBookList({
 
   return (
     <section>
-      {isLoading ? (
-        <div>書籍情報を取得中です...</div>
-      ) : error ? (
-        <div>{error}</div>
-      ) : (
-        <BookList books={books} />
-      )}
+      <BookList books={books} error={error} isLoading={isLoading} />
       {showButton && (
         <button type="button" onClick={handleFetchRandomBooks}>
           ランダム再読込

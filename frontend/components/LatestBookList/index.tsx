@@ -20,9 +20,6 @@ export default function LatestBookList({ limit = 12 }: LatestBookListProps) {
       try {
         const data = await fetchLatestBooks(limit);
         setBooks(data);
-        if (data.length === 0) {
-          setError("取得できる書籍情報がありませんでした");
-        }
       } catch (err) {
         setBooks([]);
         setError(`書籍情報の取得に失敗しました: ${err}`);
@@ -36,13 +33,7 @@ export default function LatestBookList({ limit = 12 }: LatestBookListProps) {
 
   return (
     <section>
-      {isLoading ? (
-        <div>書籍情報を取得中です...</div>
-      ) : error ? (
-        <div>{error}</div>
-      ) : (
-        <BookList books={books} />
-      )}
+      <BookList books={books} error={error} isLoading={isLoading} />
     </section>
   );
 }
