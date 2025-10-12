@@ -3,14 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Book } from "@/types/book";
-import { ReactNode } from "react";
 
 type BookDetailProps = {
   book: Book;
-  deleteButton?: ReactNode;
 };
 
-export default function BookDetail({ book, deleteButton }: BookDetailProps) {
+export default function BookDetail({ book }: BookDetailProps) {
   return (
     <div className="book-detail">
       <h2>{book.title}</h2>
@@ -56,7 +54,6 @@ export default function BookDetail({ book, deleteButton }: BookDetailProps) {
         <Link href={`/books/${book.id}/edit`}>
           <button>編集</button>
         </Link>
-        {deleteButton}
       </div>
     </div>
   );

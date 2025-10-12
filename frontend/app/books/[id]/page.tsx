@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { fetchBook } from "@/lib/api/books";
 import type { Book } from "@/types/book";
 import BookDetail from "@/components/BookDetail";
-import DeleteButton from "@/components/DeleteButton";
 
 export default function BookDetailPage() {
-  const router = useRouter();
   const params = useParams();
   const [book, setBook] = useState<Book | null>(null);
   const [error, setError] = useState<string>("");
@@ -44,16 +42,7 @@ export default function BookDetailPage() {
 
   return (
     <div className="container">
-      <BookDetail
-        book={book}
-        deleteButton={
-          <DeleteButton
-            bookId={book.id}
-            bookTitle={book.title}
-            onSuccess={() => router.push("/books")}
-          />
-        }
-      />
+      <BookDetail book={book} />
     </div>
   );
 }
