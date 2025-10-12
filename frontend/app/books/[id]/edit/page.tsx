@@ -26,6 +26,7 @@ export default function EditBookPage() {
           title: fetchedBook.title,
           author: fetchedBook.author || "",
           description: fetchedBook.description || "",
+          isbn: fetchedBook.isbn || "",
           note: fetchedBook.note || "",
         });
       } catch (err) {
@@ -43,6 +44,7 @@ export default function EditBookPage() {
       title: formData.title,
       author: formData.author || null,
       description: formData.description || null,
+      isbn: formData.isbn || null,
       note: formData.note || null,
     });
     router.push(`/books/${id}`);

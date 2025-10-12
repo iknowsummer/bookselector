@@ -7,6 +7,7 @@ export type BookFormData = {
   title: string;
   author: string;
   description: string;
+  isbn: string;
   note: string;
 };
 
@@ -19,7 +20,7 @@ type BookFormProps = {
 };
 
 export default function BookForm({
-  initialData = { title: "", author: "", description: "", note: "" },
+  initialData = { title: "", author: "", description: "", isbn: "", note: "" },
   onSubmit,
   submitLabel,
   cancelHref,
@@ -87,6 +88,17 @@ export default function BookForm({
           value={formData.description}
           onChange={handleChange}
           rows={4}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>ISBN</label>
+        <input
+          type="text"
+          name="isbn"
+          value={formData.isbn}
+          onChange={handleChange}
+          placeholder="9784XXXXXXXXX"
         />
       </div>
 

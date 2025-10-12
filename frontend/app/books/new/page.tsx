@@ -12,6 +12,7 @@ export default function NewBookPage() {
       title: formData.title,
       author: formData.author || null,
       description: formData.description || null,
+      isbn: formData.isbn || null,
       note: formData.note || null,
     });
     router.push("/books");

@@ -31,6 +31,13 @@ export default function BookDetail({ book }: BookDetailProps) {
             <span>{book.author}</span>
           </div>
 
+          {book.isbn && (
+            <div className="info-row">
+              <span className="info-label">ISBN:</span>
+              <span>{book.isbn}</span>
+            </div>
+          )}
+
           {book.description && (
             <div className="info-row">
               <span className="info-label">説明:</span>
