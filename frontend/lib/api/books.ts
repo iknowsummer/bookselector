@@ -31,6 +31,17 @@ export const fetchBooks = async (): Promise<Book[]> => {
   return await res.json();
 };
 
+export const fetchLatestBooks = async (limit: number): Promise<Book[]> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(
+    `${apiBaseUrl}/books?limit=${limit}&order_by=created_at&order=desc`
+  );
+  if (!res.ok) {
+    throw new Error("最新書籍情報の取得に失敗しました");
+  }
+  return await res.json();
+};
+
 export const createBook = async (
   bookData: Omit<Book, "id">
 ): Promise<Book> => {
