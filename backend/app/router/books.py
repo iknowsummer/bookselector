@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database import get_db
 from models import Book, Result
-from schemas import BookCreate, BookRead, ResultCreate, ResultRead
+from schemas import BookCreate, BookRead, BookUpdate, ResultCreate, ResultRead
 from exceptions import (
     handle_database_error,
     handle_internal_error,
@@ -68,6 +68,50 @@ def read_books(id: list[int] = Query(None), db: Session = Depends(get_db)):
     else:
         books = db.query(Book).all()
     return books
+
+
+@router.put("/books/{id}", response_model=BookRead)
+def update_book(
+    id: int,
+    book: BookUpdate,
+    db: Session = Depends(get_db),
+):
+    try:
+        db_book = db.query(Book).filter(Book.id == id).first()
+        if not db_book:
+            raise HTTPException(status_code=404, detail="Book not found")
+
+        for key, value in book.model_dump().items():
+            setattr(db_book, key, value)
+
+        db.commit()
+        db.refresh(db_book)
+        return db_book
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc, "book update") from exc
+
+
+@router.delete("/books/{id}")
+def delete_book(
+    id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        book = db.query(Book).filter(Book.id == id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="Book not found")
+
+        db.delete(book)
+        db.commit()
+        return {"message": "Book deleted successfully"}
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc, "book deletion") from exc
 
 
 @router.patch("/books/picked", response_model=list[BookRead])
