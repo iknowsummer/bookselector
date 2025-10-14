@@ -24,6 +24,7 @@ export default function BookForm({
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isbnError, setIsbnError] = useState<string>("");
 
   useEffect(() => {
     if (isEditMode) {
@@ -41,9 +42,32 @@ export default function BookForm({
     }));
   };
 
+  const handleIsbnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 空文字列 or 数字のみを許可
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      setFormData((prev) => ({
+        ...prev,
+        isbn: value,
+      }));
+      // 入力中はエラーをクリア
+      if (isbnError) {
+        setIsbnError("");
+      }
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsbnError("");
+
+    // ISBNバリデーション：入力されている場合は13桁かチェック
+    if (formData.isbn && formData.isbn.length !== 13) {
+      setIsbnError("ISBNは13桁で入力してください");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -98,9 +122,12 @@ export default function BookForm({
           type="text"
           name="isbn"
           value={formData.isbn}
-          onChange={handleChange}
+          onChange={handleIsbnChange}
           placeholder="9784XXXXXXXXX"
+          maxLength={13}
+          pattern="[0-9]*"
         />
+        {isbnError && <div className="error-message">{isbnError}</div>}
       </div>
 
       <div className="form-group">
