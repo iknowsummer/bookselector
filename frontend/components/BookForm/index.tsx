@@ -2,14 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
-
-export type BookFormData = {
-  title: string;
-  author: string;
-  description: string;
-  isbn: string;
-  note: string;
-};
+import type { BookFormData } from "@/types/book";
 
 type BookFormProps = {
   initialData?: BookFormData;

@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { createBook } from "@/lib/api/books";
-import BookForm, { BookFormData } from "@/components/BookForm";
+import BookForm from "@/components/BookForm";
+import type { BookFormData } from "@/types/book";
 
 export default function NewBookPage() {
   const router = useRouter();
