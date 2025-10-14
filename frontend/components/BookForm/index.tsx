@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
 
 export type BookFormData = {
@@ -17,6 +17,7 @@ type BookFormProps = {
   submitLabel: string;
   cancelHref: string;
   isLoading?: boolean;
+  isEditMode?: boolean;
 };
 
 export default function BookForm({
@@ -25,10 +26,17 @@ export default function BookForm({
   submitLabel,
   cancelHref,
   isLoading = false,
+  isEditMode = false,
 }: BookFormProps) {
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode) {
+      setFormData(initialData);
+    }
+  }, [isEditMode, initialData]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
