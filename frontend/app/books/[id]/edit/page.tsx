@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchBook, updateBook } from "@/lib/api/books";
-import BookForm, { BookFormData } from "@/components/BookForm";
+import BookForm from "@/components/BookForm";
 import DeleteButton from "@/components/DeleteButton";
 import Link from "next/link";
-import type { Book } from "@/types/book";
+import type { Book, BookFormData } from "@/types/book";
 
 export default function EditBookPage() {
   const router = useRouter();
@@ -70,6 +70,7 @@ export default function EditBookPage() {
         submitLabel="更新"
         cancelHref={`/books/${params.id}`}
         isLoading={isLoading}
+        isEditMode={true}
       />
       {book && (
         <div style={{ marginTop: "20px", textAlign: "center" }}>

@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
+import re
 
 
 class BookBase(BaseModel):
@@ -10,6 +11,16 @@ class BookBase(BaseModel):
     isbn: str | None = None
     image_url: str | None = None
     note: str | None = None
+
+    @field_validator("isbn")
+    @classmethod
+    def validate_isbn(cls, v: str | None) -> str | None:
+        if v is None or v == "":
+            return None
+        # 数字のみ、13桁
+        if not re.match(r"^[0-9]{13}$", v):
+            raise ValueError("ISBNは13桁の数字である必要があります")
+        return v
 
 
 class BookCreate(BookBase):

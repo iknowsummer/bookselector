@@ -8,3 +8,11 @@ export type Book = {
   note?: string | null;
   image_url?: string | null;
 };
+
+export type BookFormData = {
+  title: string;
+  author: string;
+  description: string;
+  isbn: string;
+  note: string;
+};

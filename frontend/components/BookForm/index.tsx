@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
-
-export type BookFormData = {
-  title: string;
-  author: string;
-  description: string;
-  isbn: string;
-  note: string;
-};
+import type { BookFormData } from "@/types/book";
 
 type BookFormProps = {
   initialData?: BookFormData;
@@ -17,6 +10,7 @@ type BookFormProps = {
   submitLabel: string;
   cancelHref: string;
   isLoading?: boolean;
+  isEditMode?: boolean;
 };
 
 export default function BookForm({
@@ -25,10 +19,18 @@ export default function BookForm({
   submitLabel,
   cancelHref,
   isLoading = false,
+  isEditMode = false,
 }: BookFormProps) {
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isbnError, setIsbnError] = useState<string>("");
+
+  useEffect(() => {
+    if (isEditMode) {
+      setFormData(initialData);
+    }
+  }, [isEditMode, initialData]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,9 +42,32 @@ export default function BookForm({
     }));
   };
 
+  const handleIsbnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 空文字列 or 数字のみを許可
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      setFormData((prev) => ({
+        ...prev,
+        isbn: value,
+      }));
+      // 入力中はエラーをクリア
+      if (isbnError) {
+        setIsbnError("");
+      }
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsbnError("");
+
+    // ISBNバリデーション：入力されている場合は13桁かチェック
+    if (formData.isbn && formData.isbn.length !== 13) {
+      setIsbnError("ISBNは13桁で入力してください");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -97,9 +122,12 @@ export default function BookForm({
           type="text"
           name="isbn"
           value={formData.isbn}
-          onChange={handleChange}
+          onChange={handleIsbnChange}
           placeholder="9784XXXXXXXXX"
+          maxLength={13}
+          pattern="[0-9]*"
         />
+        {isbnError && <div className="error-message">{isbnError}</div>}
       </div>
 
       <div className="form-group">
