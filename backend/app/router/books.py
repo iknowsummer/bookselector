@@ -133,14 +133,23 @@ def delete_book(
         raise handle_database_error(exc, "book deletion") from exc
 
 
-@router.patch("/books/picked", response_model=list[BookRead])
-def update_books_picked(
-    ids: list[int] = Body(...),
+@router.patch("/books/{id}/picked", response_model=BookRead)
+def update_book_picked(
+    id: int,
     is_picked: int = Body(..., embed=True),  # 1: picked, 0: unpicked
     db: Session = Depends(get_db),
 ):
-    books = db.query(Book).filter(Book.id.in_(ids)).all()
-    for book in books:
+    try:
+        book = db.query(Book).filter(Book.id == id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="Book not found")
+
         book.is_picked = is_picked
-    db.commit()
-    return books
+        db.commit()
+        db.refresh(book)
+        return book
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc, "book picked status update") from exc
