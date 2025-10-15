@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -7,8 +6,8 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.exc import SQLAlchemyError
 
 from database import get_db
-from models import Book, Result
-from schemas import BookCreate, BookRead, BookUpdate, ResultCreate, ResultRead
+from models import Book
+from schemas import BookCreate, BookRead, BookUpdate
 from exceptions import (
     handle_database_error,
     handle_internal_error,
@@ -145,31 +144,3 @@ def update_books_picked(
         book.is_picked = is_picked
     db.commit()
     return books
-
-
-@router.post("/results/", response_model=ResultRead)
-def create_result(
-    result: ResultCreate,
-    db: Session = Depends(get_db),
-):
-    try:
-        db_result = Result(
-            book_ids=result.book_ids,
-            note=result.note,
-            created_at=datetime.now().isoformat(),
-        )
-        db.add(db_result)
-        db.commit()
-        db.refresh(db_result)
-        return db_result
-    except SQLAlchemyError as exc:
-        db.rollback()
-        raise handle_database_error(exc, "result creation") from exc
-
-
-@router.get("/results/", response_model=list[ResultRead])
-def read_results(db: Session = Depends(get_db)):
-    try:
-        return db.query(Result).all()
-    except SQLAlchemyError as exc:
-        raise handle_database_error(exc, "results retrieval") from exc
