@@ -11,19 +11,21 @@ type BookDetailProps = {
 export default function BookDetail({ book }: BookDetailProps) {
   return (
     <div className="book-detail">
-      <h2>{book.title}</h2>
-
       <div className="book-detail-content">
-        {book.image_url && (
-          <div className="book-detail-image">
+        <div className="book-detail-image">
+          {book.image_url ? (
             <Image
               src={book.image_url}
               alt={book.title}
               width={200}
               height={300}
             />
-          </div>
-        )}
+          ) : (
+            <div className="noimage">NO IMAGE</div>
+          )}
+        </div>
+
+        <h2>{book.title}</h2>
 
         <div className="book-detail-info">
           <div className="info-row">
@@ -55,9 +57,6 @@ export default function BookDetail({ book }: BookDetailProps) {
       </div>
 
       <div className="book-detail-actions">
-        <Link href="/books">
-          <button>一覧に戻る</button>
-        </Link>
         <Link href={`/books/${book.id}/edit`}>
           <button>編集</button>
         </Link>
