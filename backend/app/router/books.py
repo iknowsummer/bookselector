@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/health")
 def health():
-    return {"message": "Hello, FastAPI!"}
+    return {"message": "OK! The server is running."}
 
 
 @router.get("/books/random", response_model=list[BookRead])
