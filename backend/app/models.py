@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import String, Text, DateTime, JSON, Boolean, func
+from sqlalchemy import String, Text, DateTime, Boolean, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base
@@ -20,17 +20,6 @@ class Book(Base):
     is_picked: Mapped[bool] = mapped_column(
         Boolean, server_default="false", nullable=False
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
-    )
-
-
-class Result(Base):
-    __tablename__ = "results"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    book_ids: Mapped[list[int]] = mapped_column(JSON, nullable=False)
-    note: Mapped[str | None] = mapped_column(Text())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
     )

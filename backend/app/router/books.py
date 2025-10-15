@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -7,8 +6,8 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.exc import SQLAlchemyError
 
 from database import get_db
-from models import Book, Result
-from schemas import BookCreate, BookRead, BookUpdate, ResultCreate, ResultRead
+from models import Book
+from schemas import BookCreate, BookRead, BookUpdate
 from exceptions import (
     handle_database_error,
     handle_internal_error,
@@ -19,7 +18,7 @@ router = APIRouter()
 
 @router.get("/health")
 def health():
-    return {"message": "Hello, FastAPI!"}
+    return {"message": "OK! The server is running."}
 
 
 @router.get("/books/random", response_model=list[BookRead])
@@ -134,42 +133,23 @@ def delete_book(
         raise handle_database_error(exc, "book deletion") from exc
 
 
-@router.patch("/books/picked", response_model=list[BookRead])
-def update_books_picked(
-    ids: list[int] = Body(...),
+@router.patch("/books/{id}/picked", response_model=BookRead)
+def update_book_picked(
+    id: int,
     is_picked: int = Body(..., embed=True),  # 1: picked, 0: unpicked
     db: Session = Depends(get_db),
 ):
-    books = db.query(Book).filter(Book.id.in_(ids)).all()
-    for book in books:
-        book.is_picked = is_picked
-    db.commit()
-    return books
-
-
-@router.post("/results/", response_model=ResultRead)
-def create_result(
-    result: ResultCreate,
-    db: Session = Depends(get_db),
-):
     try:
-        db_result = Result(
-            book_ids=result.book_ids,
-            note=result.note,
-            created_at=datetime.now().isoformat(),
-        )
-        db.add(db_result)
+        book = db.query(Book).filter(Book.id == id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="Book not found")
+
+        book.is_picked = is_picked
         db.commit()
-        db.refresh(db_result)
-        return db_result
+        db.refresh(book)
+        return book
+    except HTTPException:
+        raise
     except SQLAlchemyError as exc:
         db.rollback()
-        raise handle_database_error(exc, "result creation") from exc
-
-
-@router.get("/results/", response_model=list[ResultRead])
-def read_results(db: Session = Depends(get_db)):
-    try:
-        return db.query(Result).all()
-    except SQLAlchemyError as exc:
-        raise handle_database_error(exc, "results retrieval") from exc
+        raise handle_database_error(exc, "book picked status update") from exc

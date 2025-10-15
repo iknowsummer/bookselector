@@ -37,19 +37,3 @@ class BookRead(BookBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ResultBase(BaseModel):
-    book_ids: list[int]
-    note: str | None = None
-
-
-class ResultCreate(ResultBase):
-    pass
-
-
-class ResultRead(ResultBase):
-    id: int
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)

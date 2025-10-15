@@ -99,3 +99,21 @@ export const deleteBook = async (id: number): Promise<void> => {
     throw new Error("書籍の削除に失敗しました");
   }
 };
+
+export const updateBookPicked = async (
+  id: number,
+  isPicked: number
+): Promise<Book> => {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}/books/${id}/picked`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ is_picked: isPicked }),
+  });
+  if (!res.ok) {
+    throw new Error("書籍のピック状態の更新に失敗しました");
+  }
+  return await res.json();
+};
