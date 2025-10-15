@@ -11,7 +11,7 @@ export default function RootLayout({
       <body>
         <header>BookPit</header>
         <main>
-          <section id="nav">
+          <nav id="global-nav">
             <ul>
               <li>
                 <Link href="/">Home</Link>
@@ -23,7 +23,7 @@ export default function RootLayout({
                 <Link href="/books">Book List</Link>
               </li>
             </ul>
-          </section>
+          </nav>
 
           {children}
         </main>
