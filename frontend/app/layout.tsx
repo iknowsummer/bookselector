@@ -7,9 +7,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body>
-        <header>Book Selector</header>
+        <header>BookPit</header>
         <main>
           <section id="nav">
             <ul>
@@ -17,17 +17,16 @@ export default function RootLayout({
                 <Link href="/">Home</Link>
               </li>
               <li>
-                <Link href="/books/new">新規登録</Link>
+                <Link href="/books/new">New Book</Link>
               </li>
               <li>
-                <Link href="/books">一覧</Link>
+                <Link href="/books">Book List</Link>
               </li>
             </ul>
           </section>
 
           {children}
         </main>
-        <footer>footer</footer>
       </body>
     </html>
   );
