@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from database import get_db
-from models import Book
-from schemas import BookCreate, BookRead, BookUpdate
-from exceptions import (
+from ..database import get_db
+from ..models import Book
+from ..schemas import BookCreate, BookRead, BookUpdate
+from ..exceptions import (
     handle_database_error,
     handle_internal_error,
 )
