@@ -1,8 +1,9 @@
 const { spawn } = require("child_process");
 
 // backendディレクトリでuvicornをリロード付きで起動
-const proc = spawn("uv", ["run", "uvicorn", "main:app", "--reload"], {
-  cwd: "backend/app",
+// app.main:app 形式で、appパッケージのmainモジュールを指定
+const proc = spawn("uv", ["run", "uvicorn", "app.main:app", "--reload"], {
+  cwd: "backend",
   stdio: "inherit",
   shell: true,
 });

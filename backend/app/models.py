@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import String, Text, DateTime, Boolean, func
+from sqlalchemy import String, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from database import Base
+from .database import Base
+from .schemas import BookStatus
 
 
 class Book(Base):
@@ -17,8 +18,8 @@ class Book(Base):
     isbn: Mapped[str | None] = mapped_column(String(13), unique=True)
     image_url: Mapped[str | None] = mapped_column(String(500))
     note: Mapped[str | None] = mapped_column(Text())
-    is_picked: Mapped[bool] = mapped_column(
-        Boolean, server_default="false", nullable=False
+    status: Mapped[str] = mapped_column(
+        String(20), server_default=BookStatus.UNREAD.value, nullable=False, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False, index=True

@@ -1,7 +1,11 @@
+# docs
+docs/
+
 # VS Code
 *.code-workspace
 .vscode/
 
+# Claude
 .claude/
 CLAUDE.md
 

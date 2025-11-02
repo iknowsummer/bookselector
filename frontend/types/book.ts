@@ -1,3 +1,5 @@
+export type BookStatus = "unread" | "picked" | "read";
+
 export type Book = {
   id: number;
   title: string;
@@ -7,6 +9,8 @@ export type Book = {
   isbn?: string | null;
   note?: string | null;
   image_url?: string | null;
+  status: BookStatus;
+  created_at: string;
 };
 
 export type BookFormData = {
