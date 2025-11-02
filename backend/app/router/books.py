@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from ..database import get_db
 from ..models import Book
-from ..schemas import BookCreate, BookRead, BookUpdate
+from ..schemas import BookCreate, BookRead, BookUpdate, BookStatus
 from ..exceptions import (
     handle_database_error,
     handle_internal_error,
@@ -24,14 +24,14 @@ def health():
 @router.get("/books/random", response_model=list[BookRead])
 def random_books(
     db: Session = Depends(get_db),
-    include_picked: int = Query(0, description="1でis_picked=1も含める。"),
+    include_all_status: int = Query(0, description="1で全ステータスを含める。デフォルトはunreadのみ。"),
 ):
     try:
         pickcount = int(os.getenv("PICKCOUNT", "4"))
 
         # クエリ実行
-        if include_picked == 0:
-            query = db.query(Book).filter(Book.is_picked != 1)
+        if include_all_status == 0:
+            query = db.query(Book).filter(Book.status == BookStatus.UNREAD.value)
         else:
             query = db.query(Book)
 
@@ -109,8 +109,14 @@ def update_book(
         if not db_book:
             raise HTTPException(status_code=404, detail="Book not found")
 
-        for key, value in book.model_dump().items():
-            setattr(db_book, key, value)
+        # Noneでない値のみを更新
+        for key, value in book.model_dump(exclude_unset=True).items():
+            if value is not None:
+                # BookStatusの場合はvalueに変換
+                if isinstance(value, BookStatus):
+                    setattr(db_book, key, value.value)
+                else:
+                    setattr(db_book, key, value)
 
         db.commit()
         db.refresh(db_book)
@@ -142,18 +148,23 @@ def delete_book(
         raise handle_database_error(exc, "book deletion") from exc
 
 
-@router.patch("/books/{id}/picked", response_model=BookRead)
-def update_book_picked(
+@router.patch("/books/{id}/status", response_model=BookRead)
+def update_book_status(
     id: int,
-    is_picked: int = Body(..., embed=True),  # 1: picked, 0: unpicked
+    status: BookStatus = Body(..., embed=True),
     db: Session = Depends(get_db),
 ):
+    """
+    書籍のステータスを更新
+
+    status: "unread", "picked", "read" のいずれか
+    """
     try:
         book = db.query(Book).filter(Book.id == id).first()
         if not book:
             raise HTTPException(status_code=404, detail="Book not found")
 
-        book.is_picked = is_picked
+        book.status = status.value
         db.commit()
         db.refresh(book)
         return book
@@ -161,4 +172,4 @@ def update_book_picked(
         raise
     except SQLAlchemyError as exc:
         db.rollback()
-        raise handle_database_error(exc, "book picked status update") from exc
+        raise handle_database_error(exc, "book status update") from exc

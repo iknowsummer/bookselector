@@ -40,10 +40,12 @@ def test_get_books_with_data(client, sample_books):
     assert data[0]["title"] == book2.title
     assert data[0]["author"] == book2.author
     assert data[0]["isbn"] == book2.isbn
+    assert data[0]["status"] == "unread"  # デフォルト
 
     assert data[1]["title"] == book1.title
     assert data[1]["author"] == book1.author
     assert data[1]["isbn"] == book1.isbn
+    assert data[1]["status"] == "unread"  # デフォルト
 
 
 # ============================================================
@@ -65,6 +67,7 @@ def test_get_book_by_id(client, sample_books):
     assert data["title"] == book1.title
     assert data["author"] == book1.author
     assert data["isbn"] == book1.isbn
+    assert data["status"] == "unread"  # デフォルト
 
 
 def test_get_book_by_id_not_found(client):
@@ -214,37 +217,60 @@ def test_delete_book_not_found(client):
 
 
 # ============================================================
-# PATCH /books/{id}/picked - picked状態更新
+# PATCH /books/{id}/status - ステータス更新
 # ============================================================
 
 
-def test_update_book_picked(client, sample_books):
+def test_update_book_status_to_picked(client, sample_books):
     """
-    書籍のpicked状態を更新できることを確認
+    書籍のステータスをpickedに更新できることを確認
     """
     book1, _ = sample_books
 
-    # pickedに設定
-    response = client.patch(f"/books/{book1.id}/picked", json={"is_picked": 1})
+    response = client.patch(f"/books/{book1.id}/status", json={"status": "picked"})
     assert response.status_code == 200
 
     data = response.json()
     assert data["id"] == book1.id
-    assert data["is_picked"] == 1
+    assert data["status"] == "picked"
 
-    # unpickedに戻す
-    response = client.patch(f"/books/{book1.id}/picked", json={"is_picked": 0})
+
+def test_update_book_status_to_read(client, sample_books):
+    """
+    書籍のステータスをreadに更新できることを確認
+    """
+    book1, _ = sample_books
+
+    response = client.patch(f"/books/{book1.id}/status", json={"status": "read"})
     assert response.status_code == 200
 
     data = response.json()
-    assert data["is_picked"] == 0
+    assert data["id"] == book1.id
+    assert data["status"] == "read"
 
 
-def test_update_book_picked_not_found(client):
+def test_update_book_status_to_unread(client, sample_books):
     """
-    存在しない書籍のpicked状態を更新しようとした場合、404エラーになることを確認
+    書籍のステータスをunreadに戻せることを確認
     """
-    response = client.patch("/books/99999/picked", json={"is_picked": 1})
+    book1, _ = sample_books
+
+    # まずpickedに変更
+    client.patch(f"/books/{book1.id}/status", json={"status": "picked"})
+
+    # unreadに戻す
+    response = client.patch(f"/books/{book1.id}/status", json={"status": "unread"})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["status"] == "unread"
+
+
+def test_update_book_status_not_found(client):
+    """
+    存在しない書籍のステータスを更新しようとした場合、404エラーになることを確認
+    """
+    response = client.patch("/books/99999/status", json={"status": "picked"})
     assert response.status_code == 404
     assert response.json()["detail"] == "Book not found"
 
@@ -273,38 +299,41 @@ def test_random_books(client, book_factory):
     assert len(data) <= 4  # PICKCOUNT以下
 
 
-def test_random_books_exclude_picked(client, book_factory):
+def test_random_books_exclude_non_unread(client, book_factory):
     """
-    picked状態の書籍を除外してランダム取得できることを確認
+    unread以外の書籍を除外してランダム取得できることを確認
     """
-    # picked=1の書籍を作成
-    book_factory(title="Picked本", is_picked=1, isbn="9781111111111")
+    # picked状態の書籍を作成
+    book_factory(title="Picked本", status="picked", isbn="9781111111111")
 
-    # picked=0の書籍を作成
-    unpicked_book = book_factory(title="Unpicked本", is_picked=0, isbn="9782222222222")
+    # read状態の書籍を作成
+    book_factory(title="Read本", status="read", isbn="9782222222222")
 
-    # include_picked=0（デフォルト）の場合、picked=0のみ取得
-    response = client.get("/books/random?include_picked=0")
+    # unread状態の書籍を作成
+    unread_book = book_factory(title="Unread本", status="unread", isbn="9783333333333")
+
+    # include_all_status=0（デフォルト）の場合、unreadのみ取得
+    response = client.get("/books/random?include_all_status=0")
     assert response.status_code == 200
 
     data = response.json()
     assert len(data) == 1
-    assert data[0]["id"] == unpicked_book.id
+    assert data[0]["id"] == unread_book.id
+    assert data[0]["status"] == "unread"
 
 
-def test_random_books_include_picked(client, book_factory):
+def test_random_books_include_all_status(client, book_factory):
     """
-    include_picked=1の場合、picked状態に関わらず取得できることを確認
+    include_all_status=1の場合、すべてのステータスを取得できることを確認
     """
-    # picked=1の書籍を作成
-    book_factory(title="Picked本", is_picked=1, isbn="9781111111111")
+    # 各ステータスの書籍を作成
+    book_factory(title="Unread本", status="unread", isbn="9781111111111")
+    book_factory(title="Picked本", status="picked", isbn="9782222222222")
+    book_factory(title="Read本", status="read", isbn="9783333333333")
 
-    # picked=0の書籍を作成
-    book_factory(title="Unpicked本", is_picked=0, isbn="9782222222222")
-
-    # include_picked=1の場合、すべて取得
-    response = client.get("/books/random?include_picked=1")
+    # include_all_status=1の場合、すべて取得
+    response = client.get("/books/random?include_all_status=1")
     assert response.status_code == 200
 
     data = response.json()
-    assert len(data) == 2
+    assert len(data) == 3
