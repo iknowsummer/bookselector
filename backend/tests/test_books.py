@@ -3,6 +3,11 @@
 """
 
 
+# ============================================================
+# GET /books/ - 書籍一覧取得
+# ============================================================
+
+
 def test_get_books_empty(client, test_db):
     """
     データが空の場合、空のリストが返ることを確認
@@ -20,7 +25,10 @@ def test_get_books_with_data(client, sample_books):
     データがある場合、書籍リストが返ることを確認
 
     sample_booksフィクスチャを使用して、標準的な2冊のデータでテスト
+    フィクスチャの値を直接参照することでDRYを保つ
     """
+    book1, book2 = sample_books
+
     response = client.get("/books/")
     assert response.status_code == 200
 
@@ -29,13 +37,76 @@ def test_get_books_with_data(client, sample_books):
     assert len(data) == 2
 
     # デフォルトはcreated_at descなので、book2が先に来る
-    assert data[0]["title"] == "テスト本2"
-    assert data[0]["author"] == "著者2"
-    assert data[0]["isbn"] == "9780987654321"
+    assert data[0]["title"] == book2.title
+    assert data[0]["author"] == book2.author
+    assert data[0]["isbn"] == book2.isbn
 
-    assert data[1]["title"] == "テスト本1"
-    assert data[1]["author"] == "著者1"
-    assert data[1]["isbn"] == "9781234567890"
+    assert data[1]["title"] == book1.title
+    assert data[1]["author"] == book1.author
+    assert data[1]["isbn"] == book1.isbn
+
+
+# ============================================================
+# GET /books/{id} - 書籍個別取得
+# ============================================================
+
+
+def test_get_book_by_id(client, sample_books):
+    """
+    IDを指定して書籍を取得できることを確認
+    """
+    book1, _ = sample_books
+
+    response = client.get(f"/books/{book1.id}")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["id"] == book1.id
+    assert data["title"] == book1.title
+    assert data["author"] == book1.author
+    assert data["isbn"] == book1.isbn
+
+
+def test_get_book_by_id_not_found(client):
+    """
+    存在しないIDで書籍を取得しようとした場合、404エラーになることを確認
+    """
+    response = client.get("/books/99999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Book not found"
+
+
+def test_get_books_with_limit(client, sample_books):
+    """
+    limit パラメータで取得件数を制限できることを確認
+    """
+    _ = sample_books  # DB初期化のため
+
+    response = client.get("/books/?limit=1")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 1
+
+
+def test_get_books_with_order(client, sample_books):
+    """
+    order パラメータでソート順を変更できることを確認
+    """
+    book1, book2 = sample_books
+
+    # 昇順（asc）の場合、book1が先に来る
+    response = client.get("/books/?order=asc")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data[0]["id"] == book1.id
+    assert data[1]["id"] == book2.id
+
+
+# ============================================================
+# POST /books/ - 書籍新規作成
+# ============================================================
 
 
 def test_create_book(client):
@@ -46,7 +117,7 @@ def test_create_book(client):
         "title": "新しい本",
         "author": "テスト著者",
         "description": "テスト説明",
-        "isbn": "9781234567890"
+        "isbn": "9781111111111"
     }
     response = client.post("/books/", json=book_data)
     assert response.status_code == 200
@@ -69,3 +140,171 @@ def test_create_book_invalid_isbn(client):
     }
     response = client.post("/books/", json=book_data)
     assert response.status_code == 422  # Validation error
+
+
+# ============================================================
+# PUT /books/{id} - 書籍更新
+# ============================================================
+
+
+def test_update_book(client, sample_books):
+    """
+    書籍を更新できることを確認
+    """
+    book1, _ = sample_books
+
+    update_data = {
+        "title": "更新されたタイトル",
+        "author": "更新された著者",
+        "description": "更新された説明",
+        "isbn": "9789999999999"
+    }
+
+    response = client.put(f"/books/{book1.id}", json=update_data)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["id"] == book1.id
+    assert data["title"] == update_data["title"]
+    assert data["author"] == update_data["author"]
+    assert data["isbn"] == update_data["isbn"]
+
+
+def test_update_book_not_found(client):
+    """
+    存在しない書籍を更新しようとした場合、404エラーになることを確認
+    """
+    update_data = {
+        "title": "更新されたタイトル",
+    }
+
+    response = client.put("/books/99999", json=update_data)
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Book not found"
+
+
+# ============================================================
+# DELETE /books/{id} - 書籍削除
+# ============================================================
+
+
+def test_delete_book(client, sample_books):
+    """
+    書籍を削除できることを確認
+    """
+    book1, _ = sample_books
+
+    response = client.delete(f"/books/{book1.id}")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Book deleted successfully"
+
+    # 削除後、取得できないことを確認
+    get_response = client.get("/books/")
+    data = get_response.json()
+    assert len(data) == 1  # book2のみ残る
+
+
+def test_delete_book_not_found(client):
+    """
+    存在しない書籍を削除しようとした場合、404エラーになることを確認
+    """
+    response = client.delete("/books/99999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Book not found"
+
+
+# ============================================================
+# PATCH /books/{id}/picked - picked状態更新
+# ============================================================
+
+
+def test_update_book_picked(client, sample_books):
+    """
+    書籍のpicked状態を更新できることを確認
+    """
+    book1, _ = sample_books
+
+    # pickedに設定
+    response = client.patch(f"/books/{book1.id}/picked", json={"is_picked": 1})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["id"] == book1.id
+    assert data["is_picked"] == 1
+
+    # unpickedに戻す
+    response = client.patch(f"/books/{book1.id}/picked", json={"is_picked": 0})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["is_picked"] == 0
+
+
+def test_update_book_picked_not_found(client):
+    """
+    存在しない書籍のpicked状態を更新しようとした場合、404エラーになることを確認
+    """
+    response = client.patch("/books/99999/picked", json={"is_picked": 1})
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Book not found"
+
+
+# ============================================================
+# GET /books/random - ランダム取得
+# ============================================================
+
+
+def test_random_books(client, book_factory):
+    """
+    ランダムに書籍を取得できることを確認
+    """
+    # 5冊作成（デフォルトのPICKCOUNT=4より多く）
+    for i in range(5):
+        book_factory(
+            title=f"ランダム本{i}",
+            isbn=f"978{i:010d}"
+        )
+
+    response = client.get("/books/random")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) <= 4  # PICKCOUNT以下
+
+
+def test_random_books_exclude_picked(client, book_factory):
+    """
+    picked状態の書籍を除外してランダム取得できることを確認
+    """
+    # picked=1の書籍を作成
+    book_factory(title="Picked本", is_picked=1, isbn="9781111111111")
+
+    # picked=0の書籍を作成
+    unpicked_book = book_factory(title="Unpicked本", is_picked=0, isbn="9782222222222")
+
+    # include_picked=0（デフォルト）の場合、picked=0のみ取得
+    response = client.get("/books/random?include_picked=0")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["id"] == unpicked_book.id
+
+
+def test_random_books_include_picked(client, book_factory):
+    """
+    include_picked=1の場合、picked状態に関わらず取得できることを確認
+    """
+    # picked=1の書籍を作成
+    book_factory(title="Picked本", is_picked=1, isbn="9781111111111")
+
+    # picked=0の書籍を作成
+    book_factory(title="Unpicked本", is_picked=0, isbn="9782222222222")
+
+    # include_picked=1の場合、すべて取得
+    response = client.get("/books/random?include_picked=1")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 2

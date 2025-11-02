@@ -62,17 +62,12 @@ def create_book(
 
 @router.get("/books/", response_model=list[BookRead])
 def read_books(
-    id: list[int] = Query(None),
     limit: int | None = Query(None, description="取得件数の上限"),
     order_by: str = Query("created_at", description="ソート対象のフィールド"),
     order: str = Query("desc", description="ソート順序 (desc or asc)"),
     db: Session = Depends(get_db),
 ):
     query = db.query(Book)
-
-    # IDフィルター
-    if id is not None:
-        query = query.filter(Book.id.in_(id))
 
     # ソート処理
     order_column = getattr(Book, order_by, Book.created_at)
@@ -87,6 +82,20 @@ def read_books(
 
     books = query.all()
     return books
+
+
+@router.get("/books/{id}", response_model=BookRead)
+def read_book(
+    id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    指定されたIDの書籍を取得
+    """
+    book = db.query(Book).filter(Book.id == id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
 
 
 @router.put("/books/{id}", response_model=BookRead)

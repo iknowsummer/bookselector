@@ -61,15 +61,14 @@ export const createBook = async (
 
 export const fetchBook = async (id: number): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books?id=${id}`);
+  const res = await fetch(`${apiBaseUrl}/books/${id}`);
   if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("書籍が見つかりません");
+    }
     throw new Error("書籍情報の取得に失敗しました");
   }
-  const books = await res.json();
-  if (books.length === 0) {
-    throw new Error("書籍が見つかりません");
-  }
-  return books[0];
+  return await res.json();
 };
 
 export const updateBook = async (
