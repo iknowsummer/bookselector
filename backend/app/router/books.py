@@ -1,4 +1,5 @@
 import os
+import logging
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -13,11 +14,14 @@ from ..exceptions import (
     handle_internal_error,
 )
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
 @router.get("/health")
 def health():
+    logger.info("GET /health - Health check requested")
     return {"message": "OK! The server is running."}
 
 
@@ -26,6 +30,8 @@ def random_books(
     db: Session = Depends(get_db),
     include_all_status: int = Query(0, description="1で全ステータスを含める。デフォルトはunreadのみ。"),
 ):
+    logger.info(f"GET /books/random - include_all_status={include_all_status}")
+
     try:
         pickcount = int(os.getenv("PICKCOUNT", "4"))
 
@@ -36,11 +42,13 @@ def random_books(
             query = db.query(Book)
 
         books = query.order_by(func.random()).limit(pickcount).all()
+        logger.info(f"GET /books/random - Retrieved {len(books)} books")
         return books
 
     except HTTPException:
         raise
     except Exception as exc:
+        logger.error(f"GET /books/random - Unexpected error: {str(exc)}", exc_info=True)
         raise handle_internal_error(exc, "random book selection")
 
 
@@ -49,14 +57,18 @@ def create_book(
     book: BookCreate,
     db: Session = Depends(get_db),
 ):
+    logger.info(f"POST /books - Creating book: title='{book.title}'")
+
     try:
         db_book = Book(**book.dict())
         db.add(db_book)
         db.commit()
         db.refresh(db_book)
+        logger.info(f"POST /books - Successfully created book with id={db_book.id}")
         return db_book
     except SQLAlchemyError as exc:
         db.rollback()
+        logger.error(f"POST /books - Database error: {str(exc)}", exc_info=True)
         raise handle_database_error(exc, "book creation") from exc
 
 
@@ -67,6 +79,8 @@ def read_books(
     order: str = Query("desc", description="ソート順序 (desc or asc)"),
     db: Session = Depends(get_db),
 ):
+    logger.info(f"GET /books - limit={limit}, order_by='{order_by}', order='{order}'")
+
     query = db.query(Book)
 
     # ソート処理
@@ -81,6 +95,7 @@ def read_books(
         query = query.limit(limit)
 
     books = query.all()
+    logger.info(f"GET /books - Retrieved {len(books)} books")
     return books
 
 
@@ -92,9 +107,14 @@ def read_book(
     """
     指定されたIDの書籍を取得
     """
+    logger.info(f"GET /books/{id} - Fetching book data")
+
     book = db.query(Book).filter(Book.id == id).first()
     if not book:
+        logger.warning(f"GET /books/{id} - Book not found (404)")
         raise HTTPException(status_code=404, detail="Book not found")
+
+    logger.info(f"GET /books/{id} - Successfully retrieved book data")
     return book
 
 
@@ -104,9 +124,12 @@ def update_book(
     book: BookUpdate,
     db: Session = Depends(get_db),
 ):
+    logger.info(f"PUT /books/{id} - Updating book")
+
     try:
         db_book = db.query(Book).filter(Book.id == id).first()
         if not db_book:
+            logger.warning(f"PUT /books/{id} - Book not found (404)")
             raise HTTPException(status_code=404, detail="Book not found")
 
         # Noneでない値のみを更新
@@ -120,11 +143,13 @@ def update_book(
 
         db.commit()
         db.refresh(db_book)
+        logger.info(f"PUT /books/{id} - Successfully updated book")
         return db_book
     except HTTPException:
         raise
     except SQLAlchemyError as exc:
         db.rollback()
+        logger.error(f"PUT /books/{id} - Database error: {str(exc)}", exc_info=True)
         raise handle_database_error(exc, "book update") from exc
 
 
@@ -133,18 +158,23 @@ def delete_book(
     id: int,
     db: Session = Depends(get_db),
 ):
+    logger.info(f"DELETE /books/{id} - Deleting book")
+
     try:
         book = db.query(Book).filter(Book.id == id).first()
         if not book:
+            logger.warning(f"DELETE /books/{id} - Book not found (404)")
             raise HTTPException(status_code=404, detail="Book not found")
 
         db.delete(book)
         db.commit()
+        logger.info(f"DELETE /books/{id} - Successfully deleted book")
         return {"message": "Book deleted successfully"}
     except HTTPException:
         raise
     except SQLAlchemyError as exc:
         db.rollback()
+        logger.error(f"DELETE /books/{id} - Database error: {str(exc)}", exc_info=True)
         raise handle_database_error(exc, "book deletion") from exc
 
 
@@ -159,17 +189,22 @@ def update_book_status(
 
     status: "unread", "picked", "read" のいずれか
     """
+    logger.info(f"PATCH /books/{id}/status - Updating status to '{status.value}'")
+
     try:
         book = db.query(Book).filter(Book.id == id).first()
         if not book:
+            logger.warning(f"PATCH /books/{id}/status - Book not found (404)")
             raise HTTPException(status_code=404, detail="Book not found")
 
         book.status = status.value
         db.commit()
         db.refresh(book)
+        logger.info(f"PATCH /books/{id}/status - Successfully updated status")
         return book
     except HTTPException:
         raise
     except SQLAlchemyError as exc:
         db.rollback()
+        logger.error(f"PATCH /books/{id}/status - Database error: {str(exc)}", exc_info=True)
         raise handle_database_error(exc, "book status update") from exc
