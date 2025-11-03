@@ -1,13 +1,21 @@
+import os
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import Base, engine
-import os
-
 from dotenv import load_dotenv
 
-from router import books_router
+from .database import Base, engine
+from .router import books_router
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 

@@ -2,9 +2,12 @@
 エラーハンドリング用のヘルパー関数
 """
 
+import logging
 from typing import Dict, Any
 from fastapi import HTTPException
 from .errors import ERROR_MESSAGES, CommonError
+
+logger = logging.getLogger(__name__)
 
 
 def create_error_response(error_code: str, details: str) -> Dict[str, Any]:
@@ -16,16 +19,20 @@ def create_error_response(error_code: str, details: str) -> Dict[str, Any]:
 
 
 def handle_database_error(exc, operation: str = "database operation") -> HTTPException:
+    error_msg = f"Failed during {operation}: {str(exc)}"
+    logger.error(f"Database error: {error_msg}", exc_info=exc)
     error_detail = create_error_response(
         error_code=CommonError.DATABASE_ERROR,
-        details=f"Failed during {operation}: {str(exc)}",
+        details=error_msg,
     )
     return HTTPException(status_code=500, detail=error_detail)
 
 
 def handle_internal_error(exc, operation: str = "operation") -> HTTPException:
+    error_msg = f"Unexpected error during {operation}: {str(exc)}"
+    logger.error(f"Internal error: {error_msg}", exc_info=exc)
     error_detail = create_error_response(
         error_code=CommonError.INTERNAL_ERROR,
-        details=f"Unexpected error during {operation}: {str(exc)}",
+        details=error_msg,
     )
     return HTTPException(status_code=500, detail=error_detail)

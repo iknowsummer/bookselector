@@ -61,15 +61,14 @@ export const createBook = async (
 
 export const fetchBook = async (id: number): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books?id=${id}`);
+  const res = await fetch(`${apiBaseUrl}/books/${id}`);
   if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("書籍が見つかりません");
+    }
     throw new Error("書籍情報の取得に失敗しました");
   }
-  const books = await res.json();
-  if (books.length === 0) {
-    throw new Error("書籍が見つかりません");
-  }
-  return books[0];
+  return await res.json();
 };
 
 export const updateBook = async (
@@ -100,20 +99,20 @@ export const deleteBook = async (id: number): Promise<void> => {
   }
 };
 
-export const updateBookPicked = async (
+export const updateBookStatus = async (
   id: number,
-  isPicked: number
+  status: "unread" | "picked" | "read"
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/${id}/picked`, {
+  const res = await fetch(`${apiBaseUrl}/books/${id}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ is_picked: isPicked }),
+    body: JSON.stringify({ status }),
   });
   if (!res.ok) {
-    throw new Error("書籍のピック状態の更新に失敗しました");
+    throw new Error("書籍のステータスの更新に失敗しました");
   }
   return await res.json();
 };

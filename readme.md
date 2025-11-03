@@ -11,7 +11,7 @@ Book Selectorは、個人の蔵書コレクションを管理するためのフ�
 - 📚 **書籍管理**: 書籍の登録、編集、削除、一覧表示
 - 🎲 **ランダム選択**: 登録された書籍からランダムに選択
 - 🔍 **書籍検索**: タイトル、著者、ISBN（13桁）による検索
-- ✅ **選択済みマーク**: 選択済みの書籍を管理
+- 📖 **読書ステータス管理**: 未読(unread)、選択済み(picked)、読了(read)の3つの状態で管理
 - 🖼️ **画像管理**: 書籍の表紙画像URLを保存
 - 📝 **メモ機能**: 各書籍に対象年齢やメモを記録
 
@@ -137,12 +137,13 @@ npm run dev
 ### 主要エンドポイント
 
 - `GET /health` - ヘルスチェック
-- `GET /books/random` - ランダムに書籍を取得
+- `GET /books/random` - ランダムに書籍を取得（デフォルトは未読のみ）
 - `GET /books/` - 書籍一覧を取得
+- `GET /books/{id}` - 書籍を個別取得
 - `POST /books/` - 新しい書籍を登録
 - `PUT /books/{id}` - 書籍情報を更新
 - `DELETE /books/{id}` - 書籍を削除
-- `PATCH /books/{id}/picked` - 選択済みステータスを更新
+- `PATCH /books/{id}/status` - 読書ステータスを更新（unread/picked/read）
 
 ## プロジェクト構造
 
@@ -212,7 +213,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000  # バックエンドAPIのURL
 | isbn | String(13) | ISBN-13（任意、ユニーク） |
 | image_url | String(500) | 画像URL（任意） |
 | note | Text | メモ（任意） |
-| is_picked | Boolean | 選択済みフラグ（デフォルト: false） |
+| status | String(20) | 読書ステータス（unread/picked/read、デフォルト: unread） |
 | created_at | DateTime | 作成日時（自動生成） |
 
 ## 開発
