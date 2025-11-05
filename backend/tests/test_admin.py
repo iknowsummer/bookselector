@@ -1,6 +1,7 @@
 """
-/health エンドポイントのテスト
+管理系エンドポイントのテスト
 """
+from datetime import datetime
 
 
 def test_health_endpoint(client):
