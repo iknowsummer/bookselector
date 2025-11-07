@@ -1,8 +1,13 @@
+import os
+from dotenv import load_dotenv
 from typing import Iterator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker, DeclarativeBase
 
-DATABASE_URL = "sqlite:///./sqlite.db"
+load_dotenv()
+
+# DATABASE_URLからSQLite URLを構築
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(
     DATABASE_URL,
