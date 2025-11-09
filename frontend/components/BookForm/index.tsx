@@ -101,7 +101,7 @@ export default function BookForm({
         <input
           type="text"
           name="author"
-          value={formData.author}
+          value={formData.author ?? ""}
           onChange={handleChange}
         />
       </div>
@@ -110,7 +110,7 @@ export default function BookForm({
         <label>説明</label>
         <textarea
           name="description"
-          value={formData.description}
+          value={formData.description ?? ""}
           onChange={handleChange}
           rows={4}
         />
@@ -121,7 +121,7 @@ export default function BookForm({
         <input
           type="text"
           name="isbn"
-          value={formData.isbn}
+          value={formData.isbn ?? ""}
           onChange={handleIsbnChange}
           placeholder="9784XXXXXXXXX"
           maxLength={13}
@@ -134,7 +134,7 @@ export default function BookForm({
         <label>メモ</label>
         <textarea
           name="note"
-          value={formData.note}
+          value={formData.note ?? ""}
           onChange={handleChange}
           rows={4}
         />

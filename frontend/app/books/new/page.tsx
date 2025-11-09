@@ -15,6 +15,8 @@ export default function NewBookPage() {
       description: formData.description || null,
       isbn: formData.isbn || null,
       note: formData.note || null,
+      status: "unread",
+      created_at: new Date().toISOString(),
     });
     router.push("/books");
   };

@@ -15,8 +15,8 @@ export type Book = {
 
 export type BookFormData = {
   title: string;
-  author: string;
-  description: string;
-  isbn: string;
-  note: string;
+  author: string | null;
+  description: string | null;
+  isbn: string | null;
+  note: string | null;
 };
