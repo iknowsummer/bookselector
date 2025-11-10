@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
 import type { BookFormData } from "@/types/book";
+import { lookupBookByIsbn } from "@/lib/api/books";
 
 type BookFormProps = {
   initialData?: BookFormData;
@@ -14,7 +15,7 @@ type BookFormProps = {
 };
 
 export default function BookForm({
-  initialData = { title: "", author: "", description: "", isbn: "", note: "" },
+  initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "" },
   onSubmit,
   submitLabel,
   cancelHref,
@@ -25,6 +26,8 @@ export default function BookForm({
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isbnError, setIsbnError] = useState<string>("");
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupError, setLookupError] = useState<string>("");
 
   useEffect(() => {
     if (isEditMode) {
@@ -54,6 +57,38 @@ export default function BookForm({
       if (isbnError) {
         setIsbnError("");
       }
+      if (lookupError) {
+        setLookupError("");
+      }
+    }
+  };
+
+  const handleIsbnLookup = async () => {
+    if (!formData.isbn || formData.isbn.length !== 13) {
+      setLookupError("ISBNは13桁で入力してください");
+      return;
+    }
+
+    setIsLookingUp(true);
+    setLookupError("");
+
+    try {
+      const bookInfo = await lookupBookByIsbn(formData.isbn);
+      setFormData((prev) => ({
+        ...prev,
+        title: bookInfo.title,
+        author: bookInfo.author,
+        description: bookInfo.description,
+        image_url: bookInfo.image_url,
+      }));
+    } catch (err) {
+      if (err instanceof Error) {
+        setLookupError(err.message);
+      } else {
+        setLookupError("書籍情報の取得に失敗しました");
+      }
+    } finally {
+      setIsLookingUp(false);
     }
   };
 
@@ -118,16 +153,41 @@ export default function BookForm({
 
       <div className="form-group">
         <label>ISBN</label>
-        <input
-          type="text"
-          name="isbn"
-          value={formData.isbn ?? ""}
-          onChange={handleIsbnChange}
-          placeholder="9784XXXXXXXXX"
-          maxLength={13}
-          pattern="[0-9]*"
-        />
+        <div style={{ display: "flex", gap: "8px" }}>
+          <input
+            type="text"
+            name="isbn"
+            value={formData.isbn ?? ""}
+            onChange={handleIsbnChange}
+            placeholder="9784XXXXXXXXX"
+            maxLength={13}
+            pattern="[0-9]*"
+            style={{ flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={handleIsbnLookup}
+            disabled={isLookingUp || !formData.isbn || formData.isbn.length !== 13}
+          >
+            {isLookingUp ? "取得中..." : "情報取得"}
+          </button>
+        </div>
         {isbnError && <div className="error-message">{isbnError}</div>}
+        {lookupError && <div className="error-message">{lookupError}</div>}
+        {formData.image_url && (
+          <div style={{ marginTop: "12px" }}>
+            <img
+              src={formData.image_url}
+              alt="書籍のサムネイル"
+              style={{
+                maxWidth: "128px",
+                maxHeight: "192px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="form-group">

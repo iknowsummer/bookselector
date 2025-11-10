@@ -18,5 +18,6 @@ export type BookFormData = {
   author: string | null;
   description: string | null;
   isbn: string | null;
+  image_url: string | null;
   note: string | null;
 };

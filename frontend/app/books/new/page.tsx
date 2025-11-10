@@ -13,6 +13,7 @@ export default function NewBookPage() {
       title: formData.title,
       author: formData.author || null,
       description: formData.description || null,
+      image_url: formData.image_url || null,
       isbn: formData.isbn || null,
       note: formData.note || null,
       status: "unread",
