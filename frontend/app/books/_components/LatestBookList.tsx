@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import type { Book } from "@/types/book";
 import { fetchLatestBooks } from "@/lib/api/books";
-import { BookList } from "@/components/BookList";
+import { BookList } from "@/app/books/_components/BookList";
 
 type LatestBookListProps = {
   limit?: number;

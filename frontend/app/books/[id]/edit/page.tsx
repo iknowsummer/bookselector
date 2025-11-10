@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchBook, updateBook } from "@/lib/api/books";
-import BookForm from "@/components/BookForm";
-import DeleteButton from "@/components/DeleteButton";
+import BookForm from "@/app/books/_components/BookForm";
+import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
 import type { Book, BookFormData } from "@/types/book";
 

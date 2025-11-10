@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createBook } from "@/lib/api/books";
-import BookForm from "@/components/BookForm";
+import BookForm from "@/app/books/_components/BookForm";
 import type { BookFormData } from "@/types/book";
 
 export default function NewBookPage() {
