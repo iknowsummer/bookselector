@@ -70,7 +70,6 @@ export default function EditBookPage() {
         submitLabel="更新"
         cancelHref={`/books/${params.id}`}
         isLoading={isLoading}
-        isEditMode={true}
       />
       {book && (
         <div style={{ marginTop: "20px", textAlign: "center" }}>
