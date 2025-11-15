@@ -19,7 +19,7 @@ export const fetchApiStatus = async (): Promise<string> => {
 
 export const fetchRandomBooks = async (): Promise<Book[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/random/`);
+  const res = await fetch(`${apiBaseUrl}/books/random`);
   if (!res.ok) {
     throw new Error("書籍情報の取得に失敗しました");
   }
