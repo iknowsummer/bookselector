@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # CORS設定
+cors_origins = os.getenv("BACKEND_CORS_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
