@@ -12,6 +12,9 @@ CLAUDE.md
 # environment
 .env
 
+# SSL certificates (development only)
+**/certs/
+
 # Python
 __pycache__/
 *.pyc
