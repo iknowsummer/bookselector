@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBook } from "@/lib/api/books";
+import { formDataToBookCreate } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import type { BookFormData } from "@/types/book";
 
@@ -20,16 +21,7 @@ export default function ManualEntryPage() {
   };
 
   const handleSubmit = async (formData: BookFormData) => {
-    await createBook({
-      title: formData.title,
-      author: formData.author || null,
-      description: formData.description || null,
-      image_url: formData.image_url || null,
-      isbn: formData.isbn || null,
-      note: formData.note || null,
-      status: "unread",
-      created_at: new Date().toISOString(),
-    });
+    await createBook(formDataToBookCreate(formData));
     router.push("/books");
   };
 

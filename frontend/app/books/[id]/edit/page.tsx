@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchBook, updateBook } from "@/lib/api/books";
+import { bookToFormData, formDataToBookUpdate } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
@@ -22,14 +23,7 @@ export default function EditBookPage() {
         const id = Number(params.id);
         const fetchedBook = await fetchBook(id);
         setBook(fetchedBook);
-        setInitialData({
-          title: fetchedBook.title,
-          author: fetchedBook.author || "",
-          description: fetchedBook.description || "",
-          isbn: fetchedBook.isbn || "",
-          image_url: fetchedBook.image_url || "",
-          note: fetchedBook.note || "",
-        });
+        setInitialData(bookToFormData(fetchedBook));
       } catch (err) {
         setError(`書籍の取得に失敗しました: ${err}`);
       } finally {
@@ -41,14 +35,7 @@ export default function EditBookPage() {
 
   const handleSubmit = async (formData: BookFormData) => {
     const id = Number(params.id);
-    await updateBook(id, {
-      title: formData.title,
-      author: formData.author || null,
-      description: formData.description || null,
-      isbn: formData.isbn || null,
-      image_url: formData.image_url || null,
-      note: formData.note || null,
-    });
+    await updateBook(id, formDataToBookUpdate(formData));
     router.push(`/books/${id}`);
   };
 
