@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchBook, updateBook } from "@/lib/api/books";
-import BookForm from "@/components/BookForm";
-import DeleteButton from "@/components/DeleteButton";
+import { bookToFormData, formDataToBookUpdate } from "@/lib/api/bookTransformers";
+import BookForm from "@/app/books/_components/BookForm";
+import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
 import type { Book, BookFormData } from "@/types/book";
 
@@ -22,13 +23,7 @@ export default function EditBookPage() {
         const id = Number(params.id);
         const fetchedBook = await fetchBook(id);
         setBook(fetchedBook);
-        setInitialData({
-          title: fetchedBook.title,
-          author: fetchedBook.author || "",
-          description: fetchedBook.description || "",
-          isbn: fetchedBook.isbn || "",
-          note: fetchedBook.note || "",
-        });
+        setInitialData(bookToFormData(fetchedBook));
       } catch (err) {
         setError(`書籍の取得に失敗しました: ${err}`);
       } finally {
@@ -40,13 +35,7 @@ export default function EditBookPage() {
 
   const handleSubmit = async (formData: BookFormData) => {
     const id = Number(params.id);
-    await updateBook(id, {
-      title: formData.title,
-      author: formData.author || null,
-      description: formData.description || null,
-      isbn: formData.isbn || null,
-      note: formData.note || null,
-    });
+    await updateBook(id, formDataToBookUpdate(formData));
     router.push(`/books/${id}`);
   };
 
@@ -70,7 +59,6 @@ export default function EditBookPage() {
         submitLabel="更新"
         cancelHref={`/books/${params.id}`}
         isLoading={isLoading}
-        isEditMode={true}
       />
       {book && (
         <div style={{ marginTop: "20px", textAlign: "center" }}>

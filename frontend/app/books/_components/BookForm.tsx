@@ -2,6 +2,8 @@
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 
 type BookFormProps = {
@@ -10,27 +12,24 @@ type BookFormProps = {
   submitLabel: string;
   cancelHref: string;
   isLoading?: boolean;
-  isEditMode?: boolean;
+  onBackToIsbnInput?: () => void;
 };
 
 export default function BookForm({
-  initialData = { title: "", author: "", description: "", isbn: "", note: "" },
+  initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "" },
   onSubmit,
   submitLabel,
   cancelHref,
   isLoading = false,
-  isEditMode = false,
+  onBackToIsbnInput,
 }: BookFormProps) {
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isbnError, setIsbnError] = useState<string>("");
 
   useEffect(() => {
-    if (isEditMode) {
-      setFormData(initialData);
-    }
-  }, [isEditMode, initialData]);
+    setFormData(initialData);
+  }, [initialData]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,36 +41,26 @@ export default function BookForm({
     }));
   };
 
-  const handleIsbnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // 空文字列 or 数字のみを許可
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      setFormData((prev) => ({
-        ...prev,
-        isbn: value,
-      }));
-      // 入力中はエラーをクリア
-      if (isbnError) {
-        setIsbnError("");
-      }
-    }
+  const handleIsbnChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      isbn: value,
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsbnError("");
-
-    // ISBNバリデーション：入力されている場合は13桁かチェック
-    if (formData.isbn && formData.isbn.length !== 13) {
-      setIsbnError("ISBNは13桁で入力してください");
-      return;
-    }
 
     setIsSubmitting(true);
 
     try {
-      await onSubmit(formData);
+      // ISBNのハイフンを除去してから送信
+      const submittedData = {
+        ...formData,
+        isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
+      };
+      await onSubmit(submittedData);
     } catch (err) {
       setError(`エラー: ${err}`);
     } finally {
@@ -101,7 +90,7 @@ export default function BookForm({
         <input
           type="text"
           name="author"
-          value={formData.author}
+          value={formData.author ?? ""}
           onChange={handleChange}
         />
       </div>
@@ -110,7 +99,7 @@ export default function BookForm({
         <label>説明</label>
         <textarea
           name="description"
-          value={formData.description}
+          value={formData.description ?? ""}
           onChange={handleChange}
           rows={4}
         />
@@ -118,29 +107,52 @@ export default function BookForm({
 
       <div className="form-group">
         <label>ISBN</label>
-        <input
-          type="text"
-          name="isbn"
-          value={formData.isbn}
+        <IsbnInput
+          value={formData.isbn ?? ""}
           onChange={handleIsbnChange}
-          placeholder="9784XXXXXXXXX"
-          maxLength={13}
-          pattern="[0-9]*"
         />
-        {isbnError && <div className="error-message">{isbnError}</div>}
       </div>
+
+      {formData.image_url && (
+        <div className="form-group">
+          <label>サムネイル</label>
+          <div style={{ marginTop: "8px" }}>
+            <Image
+              src={formData.image_url}
+              alt={formData.title || "書籍の画像"}
+              width={128}
+              height={192}
+              style={{
+                maxWidth: "128px",
+                maxHeight: "192px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="form-group">
         <label>メモ</label>
         <textarea
           name="note"
-          value={formData.note}
+          value={formData.note ?? ""}
           onChange={handleChange}
           rows={4}
         />
       </div>
 
       {error && <div className="error-message">{error}</div>}
+
+      {onBackToIsbnInput && (
+        <div style={{ textAlign: "center", margin: "24px 0" }}>
+          <button type="button" onClick={onBackToIsbnInput}>
+            ISBNで情報取得
+          </button>
+        </div>
+      )}
 
       <div className="form-actions">
         <button type="submit" disabled={isSubmitting}>

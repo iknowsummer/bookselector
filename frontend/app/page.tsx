@@ -1,5 +1,5 @@
-import RandomBookList from "@/components/RandomBookList";
-import LatestBookList from "@/components/LatestBookList";
+import RandomBookList from "@/app/books/_components/RandomBookList";
+import LatestBookList from "@/app/books/_components/LatestBookList";
 
 export default function Home() {
   return (

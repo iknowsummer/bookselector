@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { fetchBook } from "@/lib/api/books";
 import type { Book } from "@/types/book";
-import BookDetail from "@/components/BookDetail";
+import BookDetail from "@/app/books/_components/BookDetail";
 
 export default function BookDetailPage() {
   const params = useParams();

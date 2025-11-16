@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from .database import Base, engine
-from .router import books_router
+from .router import books_router, admin_router, lookup_router
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # CORS設定
+cors_origins = os.getenv("BACKEND_CORS_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,4 +34,6 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 # ルーターを登録
+app.include_router(admin_router)
 app.include_router(books_router)
+app.include_router(lookup_router)

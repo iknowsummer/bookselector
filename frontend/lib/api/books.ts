@@ -1,7 +1,11 @@
 import type { Book } from "@/types/book";
 
 const getApiBaseUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_API_URL環境変数が設定されていません");
+  }
+  return url;
 };
 
 export const fetchApiStatus = async (): Promise<string> => {
@@ -15,7 +19,7 @@ export const fetchApiStatus = async (): Promise<string> => {
 
 export const fetchRandomBooks = async (): Promise<Book[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/random/`);
+  const res = await fetch(`${apiBaseUrl}/books/random`);
   if (!res.ok) {
     throw new Error("書籍情報の取得に失敗しました");
   }
@@ -73,7 +77,7 @@ export const fetchBook = async (id: number): Promise<Book> => {
 
 export const updateBook = async (
   id: number,
-  bookData: Omit<Book, "id">
+  bookData: Partial<Omit<Book, "id" | "status" | "created_at">>
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
   const res = await fetch(`${apiBaseUrl}/books/${id}`, {
@@ -116,3 +120,4 @@ export const updateBookStatus = async (
   }
   return await res.json();
 };
+
