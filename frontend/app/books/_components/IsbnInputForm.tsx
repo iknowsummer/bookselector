@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { lookupBookByIsbn } from "@/lib/api/books";
+import { lookupBookByIsbn } from "@/lib/api/lookup";
 import type { BookFormData } from "@/types/book";
 import BarcodeScanner from "./BarcodeScanner";
 

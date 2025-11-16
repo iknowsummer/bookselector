@@ -2,7 +2,7 @@
 
 import { useState, ChangeEvent } from "react";
 import Image from "next/image";
-import { lookupBookByIsbn } from "@/lib/api/books";
+import { lookupBookByIsbn } from "@/lib/api/lookup";
 
 type IsbnLookupProps = {
   isbn: string | null;
