@@ -17,6 +17,7 @@ export default function BarcodeScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isScanning, setIsScanning] = useState(true);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const hasScannedRef = useRef(false); // スキャン完了フラグ
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
@@ -42,16 +43,23 @@ export default function BarcodeScanner({
           selectedDevice.deviceId,
           videoRef.current!,
           (result, error) => {
+            // 既にスキャン済みの場合は処理しない
+            if (hasScannedRef.current) {
+              return;
+            }
+
             if (result) {
               const text = result.getText();
-              // ISBN-13形式（13桁の数字）かチェック
-              if (/^\d{13}$/.test(text)) {
+              // ISBN-13形式（978または979で始まる13桁の数字）のみ採用
+              // それ以外のバーコード（JANコード、ISBN-10など）は静かに無視
+              if (/^(978|979)\d{10}$/.test(text)) {
+                hasScannedRef.current = true; // スキャン完了フラグを立てる
                 setIsScanning(false);
+                // カメラを即座に停止
+                codeReader.reset();
                 onScan(text);
-              } else if (/^\d{10}$/.test(text)) {
-                // ISBN-10の場合も受け入れる（必要に応じて）
-                onError("13桁のISBNバーコードを読み取ってください");
               }
+              // ISBN-13以外は何もせず次のフレームを待つ
             }
 
             if (error && !(error instanceof NotFoundException)) {
