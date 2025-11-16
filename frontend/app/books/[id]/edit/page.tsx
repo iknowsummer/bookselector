@@ -27,6 +27,7 @@ export default function EditBookPage() {
           author: fetchedBook.author || "",
           description: fetchedBook.description || "",
           isbn: fetchedBook.isbn || "",
+          image_url: fetchedBook.image_url || "",
           note: fetchedBook.note || "",
         });
       } catch (err) {
@@ -45,6 +46,7 @@ export default function EditBookPage() {
       author: formData.author || null,
       description: formData.description || null,
       isbn: formData.isbn || null,
+      image_url: formData.image_url || null,
       note: formData.note || null,
     });
     router.push(`/books/${id}`);

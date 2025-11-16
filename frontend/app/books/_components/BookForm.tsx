@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { BookFormData } from "@/types/book";
 
 type BookFormProps = {
@@ -102,6 +103,27 @@ export default function BookForm({
           maxLength={13}
         />
       </div>
+
+      {formData.image_url && (
+        <div className="form-group">
+          <label>サムネイル</label>
+          <div style={{ marginTop: "8px" }}>
+            <Image
+              src={formData.image_url}
+              alt={formData.title || "書籍の画像"}
+              width={128}
+              height={192}
+              style={{
+                maxWidth: "128px",
+                maxHeight: "192px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="form-group">
         <label>メモ</label>
