@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { lookupBookByIsbn } from "@/lib/api/lookup";
+import IsbnInput, { cleanIsbn, isValidIsbn } from "@/app/books/_components/IsbnInput";
 import type { BookFormData } from "@/types/book";
 
 export default function IsbnInputPage() {
@@ -11,32 +12,31 @@ export default function IsbnInputPage() {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [lookupError, setLookupError] = useState<string>("");
 
-  const handleIsbnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // 空文字列 or 数字のみを許可
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      setIsbn(value);
-      if (lookupError) {
-        setLookupError("");
-      }
+  const handleIsbnChange = (value: string) => {
+    setIsbn(value);
+    if (lookupError) {
+      setLookupError("");
     }
   };
 
   const handleIsbnLookup = async () => {
-    if (!isbn || isbn.length !== 13) {
+    // ハイフンを除去して13桁チェック
+    if (!isValidIsbn(isbn)) {
       setLookupError("ISBNは13桁で入力してください");
       return;
     }
+
+    const cleanedIsbn = cleanIsbn(isbn);
 
     setIsLookingUp(true);
     setLookupError("");
 
     try {
-      const bookInfo = await lookupBookByIsbn(isbn);
+      const bookInfo = await lookupBookByIsbn(cleanedIsbn);
 
       // 取得した書籍情報をURLパラメータとして渡す
       const params = new URLSearchParams({
-        isbn: isbn,
+        isbn: cleanedIsbn,
         title: bookInfo.title || "",
         author: bookInfo.author || "",
         description: bookInfo.description || "",
@@ -55,8 +55,9 @@ export default function IsbnInputPage() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && isbn && isbn.length === 13) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // ハイフンを除去して13桁チェック
+    if (e.key === "Enter" && isValidIsbn(isbn)) {
       handleIsbnLookup();
     }
   };
@@ -76,21 +77,17 @@ export default function IsbnInputPage() {
             ISBNを入力すると、書籍情報を自動取得できます
           </p>
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-            <input
-              type="text"
-              value={isbn}
-              onChange={handleIsbnChange}
-              onKeyPress={handleKeyPress}
-              placeholder="9784XXXXXXXXX"
-              maxLength={13}
-              pattern="[0-9]*"
-              style={{ flex: 1 }}
-              autoFocus
-            />
+            <div style={{ flex: 1 }} onKeyDown={handleKeyDown}>
+              <IsbnInput
+                value={isbn}
+                onChange={handleIsbnChange}
+                autoFocus
+              />
+            </div>
             <button
               type="button"
               onClick={handleIsbnLookup}
-              disabled={isLookingUp || !isbn || isbn.length !== 13}
+              disabled={isLookingUp || !isValidIsbn(isbn)}
             >
               {isLookingUp ? "取得中..." : "情報取得"}
             </button>

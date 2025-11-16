@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 
 type BookFormProps = {
@@ -40,6 +41,13 @@ export default function BookForm({
     }));
   };
 
+  const handleIsbnChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      isbn: value,
+    }));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -47,7 +55,12 @@ export default function BookForm({
     setIsSubmitting(true);
 
     try {
-      await onSubmit(formData);
+      // ISBNのハイフンを除去してから送信
+      const submittedData = {
+        ...formData,
+        isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
+      };
+      await onSubmit(submittedData);
     } catch (err) {
       setError(`エラー: ${err}`);
     } finally {
@@ -94,13 +107,9 @@ export default function BookForm({
 
       <div className="form-group">
         <label>ISBN</label>
-        <input
-          type="text"
-          name="isbn"
+        <IsbnInput
           value={formData.isbn ?? ""}
-          onChange={handleChange}
-          placeholder="9784XXXXXXXXX"
-          maxLength={13}
+          onChange={handleIsbnChange}
         />
       </div>
 
