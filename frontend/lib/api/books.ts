@@ -77,7 +77,7 @@ export const fetchBook = async (id: number): Promise<Book> => {
 
 export const updateBook = async (
   id: number,
-  bookData: Omit<Book, "id">
+  bookData: Partial<Omit<Book, "id" | "status" | "created_at">>
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
   const res = await fetch(`${apiBaseUrl}/books/${id}`, {
@@ -120,3 +120,4 @@ export const updateBookStatus = async (
   }
   return await res.json();
 };
+
