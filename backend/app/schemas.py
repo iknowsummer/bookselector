@@ -4,6 +4,27 @@ from enum import Enum
 import re
 
 
+def validate_isbn_format(v: str | None) -> str | None:
+    """
+    ISBNフォーマットを検証する共通関数
+
+    Args:
+        v: ISBN文字列またはNone
+
+    Returns:
+        str | None: 検証済みのISBN文字列またはNone
+
+    Raises:
+        ValueError: ISBNが13桁の数字でない場合
+    """
+    if v is None or v == "":
+        return None
+    # 数字のみ、13桁
+    if not re.match(r"^[0-9]{13}$", v):
+        raise ValueError("ISBNは13桁の数字である必要があります")
+    return v
+
+
 class BookStatus(str, Enum):
     """
     書籍の読書ステータス
@@ -26,12 +47,7 @@ class BookBase(BaseModel):
     @field_validator("isbn")
     @classmethod
     def validate_isbn(cls, v: str | None) -> str | None:
-        if v is None or v == "":
-            return None
-        # 数字のみ、13桁
-        if not re.match(r"^[0-9]{13}$", v):
-            raise ValueError("ISBNは13桁の数字である必要があります")
-        return v
+        return validate_isbn_format(v)
 
 
 class BookCreate(BookBase):
@@ -51,12 +67,7 @@ class BookUpdate(BaseModel):
     @field_validator("isbn")
     @classmethod
     def validate_isbn(cls, v: str | None) -> str | None:
-        if v is None or v == "":
-            return None
-        # 数字のみ、13桁
-        if not re.match(r"^[0-9]{13}$", v):
-            raise ValueError("ISBNは13桁の数字である必要があります")
-        return v
+        return validate_isbn_format(v)
 
 
 class BookRead(BookBase):
