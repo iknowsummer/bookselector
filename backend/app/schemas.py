@@ -76,3 +76,23 @@ class BookRead(BookBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ShelfBase(BaseModel):
+    name: str
+    memo: str | None = None
+
+
+class ShelfCreate(ShelfBase):
+    pass
+
+
+class ShelfUpdate(BaseModel):
+    name: str | None = None
+    memo: str | None = None
+
+
+class ShelfRead(ShelfBase):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
