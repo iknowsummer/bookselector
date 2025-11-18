@@ -152,3 +152,32 @@ def sample_books(book_factory):
         isbn="9780987654321"
     )
     return [book1, book2]
+
+
+@pytest.fixture
+def shelf_factory(test_db):
+    """棚データ作成用ファクトリ"""
+    from app.models import Shelf
+
+    def _create_shelf(**kwargs):
+        defaults = {
+            "name": "living",
+            "memo": "リビング棚",
+        }
+        defaults.update(kwargs)
+
+        shelf = Shelf(**defaults)
+        test_db.add(shelf)
+        test_db.commit()
+        test_db.refresh(shelf)
+        return shelf
+
+    return _create_shelf
+
+
+@pytest.fixture
+def sample_shelves(shelf_factory):
+    """2件分の棚データ"""
+    shelf1 = shelf_factory(name="living", memo="リビング")
+    shelf2 = shelf_factory(name="bedroom", memo="寝室")
+    return [shelf1, shelf2]

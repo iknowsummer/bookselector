@@ -8,9 +8,11 @@ Book Selector APIのテストスイート
 backend/
 ├── app/              # アプリケーションコード
 ├── tests/            # テストコード
-│   ├── conftest.py   # pytest設定とフィクスチャ
-│   ├── test_books.py # 書籍関連のテスト
-│   └── test_health.py # ヘルスチェックのテスト
+│   ├── conftest.py    # pytest設定とフィクスチャ
+│   ├── test_admin.py  # 管理系エンドポイントのテスト
+│   ├── test_books.py  # 書籍関連のテスト
+│   ├── test_lookup.py # 検索APIのテスト
+│   └── test_shelves.py # 棚関連のテスト
 └── pytest.ini        # pytest設定ファイル
 ```
 
@@ -47,14 +49,19 @@ uv run pytest --lf
 
 ## 現在のテストケース
 
-### test_health.py
-- `test_health_endpoint`: `/health`エンドポイントの正常性確認
-
 ### test_books.py
 - `test_get_books_empty`: 空の書籍リストの取得
 - `test_get_books_with_data`: データがある場合の書籍リスト取得
 - `test_create_book`: 書籍の新規作成
 - `test_create_book_invalid_isbn`: 不正なISBNのバリデーション
+
+### test_shelves.py
+- `test_get_shelves_empty`: 空の棚リスト取得
+- `test_get_shelves_with_data`: 棚データがある場合の取得
+- `test_create_shelf`: 棚の新規作成
+- `test_get_shelf_detail`: 詳細取得
+- `test_update_shelf` / `test_update_shelf_not_found`: 更新成功と404
+- `test_delete_shelf` / `test_delete_shelf_not_found`: 削除成功と404
 
 ## テストフィクスチャ
 
