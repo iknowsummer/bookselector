@@ -71,11 +71,19 @@ def read_books(
     limit: int | None = Query(None, description="取得件数の上限"),
     order_by: str = Query("created_at", description="ソート対象のフィールド"),
     order: str = Query("desc", description="ソート順序 (desc or asc)"),
+    shelf_id: int | None = Query(None, description="特定の棚に所属する本のみを取得"),
+    unassigned_only: bool = Query(False, description="棚未登録の本のみを取得"),
     db: Session = Depends(get_db),
 ):
-    logger.info(f"GET /books - limit={limit}, order_by='{order_by}', order='{order}'")
+    logger.info(f"GET /books - limit={limit}, order_by='{order_by}', order='{order}', shelf_id={shelf_id}, unassigned_only={unassigned_only}")
 
     query = db.query(Book)
+
+    # 棚IDでフィルタリング
+    if unassigned_only:
+        query = query.filter(Book.shelf_id.is_(None))
+    elif shelf_id is not None:
+        query = query.filter(Book.shelf_id == shelf_id)
 
     # ソート処理
     order_column = getattr(Book, order_by, Book.created_at)

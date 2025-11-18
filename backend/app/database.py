@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from typing import Iterator
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker, DeclarativeBase
 
 load_dotenv()
@@ -16,6 +16,12 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
+# SQLiteで外部キー制約を有効化
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_conn, _connection_record):
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 class Base(DeclarativeBase):
     pass

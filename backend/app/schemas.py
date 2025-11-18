@@ -43,6 +43,7 @@ class BookBase(BaseModel):
     isbn: str | None = None
     image_url: str | None = None
     note: str | None = None
+    shelf_id: int | None = None
 
     @field_validator("isbn")
     @classmethod
@@ -63,6 +64,7 @@ class BookUpdate(BaseModel):
     image_url: str | None = None
     note: str | None = None
     status: BookStatus | None = None
+    shelf_id: int | None = None
 
     @field_validator("isbn")
     @classmethod

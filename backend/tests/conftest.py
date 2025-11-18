@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -20,6 +20,14 @@ def test_engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
+    # SQLiteで外部キー制約を有効化
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn, _connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
@@ -115,6 +123,7 @@ def book_factory(test_db):
             "title": "テスト本",
             "author": "テスト著者",
             "description": "テスト説明",
+            "shelf_id": None,
         }
         # 引数でデフォルト値を上書き
         defaults.update(kwargs)

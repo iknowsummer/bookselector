@@ -19,9 +19,12 @@ export const fetchRandomBooks = async (): Promise<Book[]> => {
   return await res.json();
 };
 
-export const fetchBooks = async (): Promise<Book[]> => {
+export const fetchBooks = async (shelfId?: number | null): Promise<Book[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books`);
+  const url = shelfId
+    ? `${apiBaseUrl}/books?shelf_id=${shelfId}`
+    : `${apiBaseUrl}/books`;
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error("書籍情報の取得に失敗しました");
   }
