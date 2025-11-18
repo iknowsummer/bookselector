@@ -1,12 +1,5 @@
 import type { Book } from "@/types/book";
-
-const getApiBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_URL;
-  if (!url) {
-    throw new Error("NEXT_PUBLIC_API_URL環境変数が設定されていません");
-  }
-  return url;
-};
+import { getApiBaseUrl } from "./client";
 
 export const fetchApiStatus = async (): Promise<string> => {
   const apiBaseUrl = getApiBaseUrl();
