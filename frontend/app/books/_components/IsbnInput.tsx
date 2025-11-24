@@ -35,6 +35,7 @@ export default function IsbnInput({
       onChange={handleChange}
       placeholder={placeholder}
       pattern="[0-9-]*"
+      inputMode="numeric"
       required={required}
       autoFocus={autoFocus}
     />
