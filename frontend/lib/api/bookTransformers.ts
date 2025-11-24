@@ -12,6 +12,7 @@ export function bookToFormData(book: Book): BookFormData {
     isbn: book.isbn ?? "",
     image_url: book.image_url ?? "",
     note: book.note ?? "",
+    shelf_id: book.shelf_id ?? null,
   };
 }
 
@@ -26,6 +27,7 @@ export function formDataToBookUpdate(formData: BookFormData): {
   isbn: string | null;
   image_url: string | null;
   note: string | null;
+  shelf_id: number | null;
 } {
   return {
     title: formData.title,
@@ -34,6 +36,7 @@ export function formDataToBookUpdate(formData: BookFormData): {
     isbn: formData.isbn || null,
     image_url: formData.image_url || null,
     note: formData.note || null,
+    shelf_id: formData.shelf_id ?? null,
   };
 }
 

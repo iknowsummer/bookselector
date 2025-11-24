@@ -4,13 +4,13 @@
 外部APIから書籍情報を検索する
 """
 import logging
-import re
 
 from fastapi import APIRouter, HTTPException
 
 from .schemas import GoogleBooksResponse
 from ..exceptions import handle_internal_error
 from .google_books import fetch_book_by_isbn
+from ..schemas import validate_isbn_format
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,13 @@ def lookup_book_by_isbn_endpoint(isbn: str):
     logger.info(f"GET /lookup/isbn/{isbn} - Looking up book")
 
     # ISBNフォーマット検証（13桁の数字）
-    if not re.match(r"^[0-9]{13}$", isbn):
+    try:
+        validate_isbn_format(isbn)
+    except ValueError as e:
         logger.warning(f"GET /lookup/isbn/{isbn} - Invalid ISBN format (400)")
         raise HTTPException(
             status_code=400,
-            detail="ISBNは13桁の数字である必要があります"
+            detail=str(e)
         )
 
     try:

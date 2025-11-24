@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Book } from "@/types/book";
+import type { Shelf } from "@/types/shelf";
 
 type BookDetailProps = {
   book: Book;
+  shelf?: Shelf | null;
 };
 
-export default function BookDetail({ book }: BookDetailProps) {
+export default function BookDetail({ book, shelf }: BookDetailProps) {
   return (
     <div className="book-detail">
       <div className="book-detail-content">
@@ -39,6 +41,11 @@ export default function BookDetail({ book }: BookDetailProps) {
               <span>{book.isbn}</span>
             </div>
           )}
+
+          <div className="info-row">
+            <span className="info-label">棚:</span>
+            <span>{shelf ? shelf.name : "未設定"}</span>
+          </div>
 
           {book.description && (
             <div className="info-row">

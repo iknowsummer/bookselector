@@ -337,3 +337,113 @@ def test_random_books_include_all_status(client, book_factory):
 
     data = response.json()
     assert len(data) == 3
+
+
+# ============================================================
+# Shelf関連のテスト
+# ============================================================
+
+
+def test_create_book_with_shelf_id(client, shelf_factory):
+    """
+    shelf_idを指定して書籍を作成できることを確認
+    """
+    shelf = shelf_factory(name="test_shelf")
+
+    book_data = {
+        "title": "棚付き本",
+        "author": "テスト著者",
+        "shelf_id": shelf.id
+    }
+    response = client.post("/books/", json=book_data)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["title"] == book_data["title"]
+    assert data["shelf_id"] == shelf.id
+
+
+def test_create_book_without_shelf_id(client):
+    """
+    shelf_idなしで書籍を作成できることを確認（NULL許可）
+    """
+    book_data = {
+        "title": "棚なし本",
+        "author": "テスト著者",
+    }
+    response = client.post("/books/", json=book_data)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["title"] == book_data["title"]
+    assert data["shelf_id"] is None
+
+
+def test_update_book_shelf_id(client, book_factory, shelf_factory):
+    """
+    書籍のshelf_idを更新できることを確認
+    """
+    book = book_factory(title="テスト本")
+    shelf = shelf_factory(name="new_shelf")
+
+    update_data = {
+        "shelf_id": shelf.id
+    }
+
+    response = client.put(f"/books/{book.id}", json=update_data)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["shelf_id"] == shelf.id
+
+
+def test_filter_books_by_shelf_id(client, book_factory, shelf_factory):
+    """
+    shelf_idでフィルタリングして書籍を取得できることを確認
+    """
+    shelf1 = shelf_factory(name="shelf1")
+    shelf2 = shelf_factory(name="shelf2")
+
+    book1 = book_factory(title="本1", shelf_id=shelf1.id, isbn="9781111111111")
+    book2 = book_factory(title="本2", shelf_id=shelf1.id, isbn="9782222222222")
+    book3 = book_factory(title="本3", shelf_id=shelf2.id, isbn="9783333333333")
+    book4 = book_factory(title="本4", shelf_id=None, isbn="9784444444444")
+
+    # shelf1の本のみ取得
+    response = client.get(f"/books/?shelf_id={shelf1.id}")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 2
+    book_ids = [b["id"] for b in data]
+    assert book1.id in book_ids
+    assert book2.id in book_ids
+    assert book3.id not in book_ids
+    assert book4.id not in book_ids
+
+
+def test_shelf_deletion_sets_book_shelf_id_to_null(client, book_factory, shelf_factory, test_db):
+    """
+    棚を削除したときに書籍のshelf_idがNULLになることを確認
+    """
+    from app.models import Book
+
+    shelf = shelf_factory(name="delete_test_shelf")
+    book = book_factory(title="テスト本", shelf_id=shelf.id)
+    book_id = book.id
+
+    # 書籍のshelf_idが設定されていることを確認
+    response = client.get(f"/books/{book_id}")
+    assert response.json()["shelf_id"] == shelf.id
+
+    # 棚を削除
+    delete_response = client.delete(f"/shelves/{shelf.id}")
+    assert delete_response.status_code == 200
+
+    # DBセッションをリフレッシュしてキャッシュをクリア
+    test_db.expire_all()
+
+    # 書籍のshelf_idがNULLになっていることを確認
+    db_book = test_db.query(Book).filter(Book.id == book_id).first()
+    assert db_book is not None
+    assert db_book.shelf_id is None

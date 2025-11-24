@@ -11,6 +11,7 @@ export type Book = {
   image_url?: string | null;
   status: BookStatus;
   created_at: string;
+  shelf_id?: number | null;
 };
 
 export type BookFormData = {
@@ -20,4 +21,5 @@ export type BookFormData = {
   isbn: string | null;
   image_url: string | null;
   note: string | null;
+  shelf_id?: number | null;
 };

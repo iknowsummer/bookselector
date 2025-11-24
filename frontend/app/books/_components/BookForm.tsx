@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
+import type { Shelf } from "@/types/shelf";
+import { fetchShelves } from "@/lib/api/shelves";
 
 type BookFormProps = {
   initialData?: BookFormData;
@@ -16,7 +18,7 @@ type BookFormProps = {
 };
 
 export default function BookForm({
-  initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "" },
+  initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
   onSubmit,
   submitLabel,
   cancelHref,
@@ -26,18 +28,36 @@ export default function BookForm({
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shelves, setShelves] = useState<Shelf[]>([]);
+  const [shelvesLoading, setShelvesLoading] = useState(false);
+
+  // 棚一覧を取得
+  useEffect(() => {
+    const loadShelves = async () => {
+      setShelvesLoading(true);
+      try {
+        const data = await fetchShelves();
+        setShelves(data);
+      } catch (err) {
+        console.error("棚一覧の取得に失敗しました:", err);
+      } finally {
+        setShelvesLoading(false);
+      }
+    };
+    loadShelves();
+  }, []);
 
   useEffect(() => {
     setFormData(initialData);
   }, [initialData]);
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value === "" ? null : name === "shelf_id" ? Number(value) : value,
     }));
   };
 
@@ -111,6 +131,24 @@ export default function BookForm({
           value={formData.isbn ?? ""}
           onChange={handleIsbnChange}
         />
+      </div>
+
+      <div className="form-group">
+        <label>棚</label>
+        <select
+          name="shelf_id"
+          value={formData.shelf_id ?? ""}
+          onChange={handleChange}
+          disabled={shelvesLoading}
+        >
+          <option value="">棚なし</option>
+          {shelves.map((shelf) => (
+            <option key={shelf.id} value={shelf.id}>
+              {shelf.name}
+            </option>
+          ))}
+        </select>
+        {shelvesLoading && <span style={{ marginLeft: "8px", fontSize: "0.9em", color: "#666" }}>読み込み中...</span>}
       </div>
 
       {formData.image_url && (
