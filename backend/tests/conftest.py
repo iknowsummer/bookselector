@@ -165,10 +165,16 @@ def sample_books(book_factory):
 
 @pytest.fixture
 def shelf_factory(test_db):
-    """棚データ作成用ファクトリ"""
+    """棚データ作成用ファクトリ (user-scoped)"""
     from app.models import Shelf
 
     def _create_shelf(**kwargs):
+        if "user_id" not in kwargs:
+            raise ValueError(
+                "user_id is required for shelf creation. "
+                "Pass user_id explicitly or ensure admin_user fixture is loaded."
+            )
+
         defaults = {
             "name": "living",
             "memo": "リビング棚",
@@ -185,10 +191,10 @@ def shelf_factory(test_db):
 
 
 @pytest.fixture
-def sample_shelves(shelf_factory):
-    """2件分の棚データ"""
-    shelf1 = shelf_factory(name="living", memo="リビング")
-    shelf2 = shelf_factory(name="bedroom", memo="寝室")
+def sample_shelves(shelf_factory, admin_user):
+    """2件分の棚データ (admin user scoped)"""
+    shelf1 = shelf_factory(user_id=admin_user.id, name="living", memo="リビング")
+    shelf2 = shelf_factory(user_id=admin_user.id, name="bedroom", memo="寝室")
     return [shelf1, shelf2]
 
 
@@ -210,3 +216,9 @@ def user_factory(test_db):
         return user
 
     return _create_user
+
+
+@pytest.fixture
+def admin_user(user_factory):
+    """Admin user fixture (id=1) for Phase 1 user context."""
+    return user_factory(name="admin")
