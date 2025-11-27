@@ -98,3 +98,22 @@ class ShelfRead(ShelfBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserBase(BaseModel):
+    name: str
+
+
+class UserCreate(UserBase):
+    pass
+
+
+class UserUpdate(BaseModel):
+    name: str | None = None
+
+
+class UserRead(UserBase):
+    id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

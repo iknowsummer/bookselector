@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from .database import Base, engine
-from .router import books_router, admin_router, shelves_router, lookup_router
+from .router import books_router, admin_router, shelves_router, users_router, lookup_router
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
@@ -37,4 +37,5 @@ Base.metadata.create_all(bind=engine)
 app.include_router(admin_router)
 app.include_router(books_router)
 app.include_router(shelves_router)
+app.include_router(users_router)
 app.include_router(lookup_router)

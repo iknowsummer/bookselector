@@ -190,3 +190,23 @@ def sample_shelves(shelf_factory):
     shelf1 = shelf_factory(name="living", memo="リビング")
     shelf2 = shelf_factory(name="bedroom", memo="寝室")
     return [shelf1, shelf2]
+
+
+@pytest.fixture
+def user_factory(test_db):
+    """ユーザー作成ファクトリフィクスチャ"""
+    from app.models import User
+
+    def _create_user(**kwargs):
+        defaults = {
+            "name": "テストユーザー",
+        }
+        defaults.update(kwargs)
+
+        user = User(**defaults)
+        test_db.add(user)
+        test_db.commit()
+        test_db.refresh(user)
+        return user
+
+    return _create_user
