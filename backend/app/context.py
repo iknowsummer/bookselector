@@ -1,4 +1,5 @@
-"""User context management for API requests."""
+"""APIリクエストのユーザーコンテキスト管理"""
+import logging
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -6,27 +7,33 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 
+logger = logging.getLogger(__name__)
+
 
 def get_current_user(db: Session = Depends(get_db)) -> User:
     """
-    Get current user context.
-    Phase 1: Always returns admin user (id=1).
-    Future: Will use authentication to determine actual user.
+    現在のユーザーコンテキストを取得する。
+    現在の実装: 常に管理者ユーザー（id=1）を返す。存在しない場合は自動作成する。
+    認証実装後: 認証情報から実際のユーザーを判定する。
 
     Returns:
-        User: The current user (admin in Phase 1)
+        User: 現在のユーザー（現在は管理者のみ）
 
     Raises:
-        RuntimeError: If admin user doesn't exist
+        RuntimeError: 管理者ユーザーの作成/取得に失敗した場合
     """
     user = db.query(User).filter(User.id == 1).first()
+
     if not user:
-        raise RuntimeError(
-            "Admin user (id=1) not found. "
-            "Please run scripts/create_admin_user.py first."
-        )
+        # 最初のアクセス時に管理者ユーザーを自動作成
+        user = User(id=1, name="admin")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        logger.info("管理者ユーザー（id=1）を自動作成しました")
+
     return user
 
 
-# Type alias for dependency injection
+# 依存性注入用の型エイリアス
 CurrentUser = Annotated[User, Depends(get_current_user)]
