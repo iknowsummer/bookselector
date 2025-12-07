@@ -104,34 +104,56 @@ def client(test_db):
 
 
 @pytest.fixture
-def book_factory(test_db):
+def book_factory(test_db, admin_user):
     """
-    書籍作成ファクトリフィクスチャ
+    書籍作成ファクトリフィクスチャ（UserBook も自動作成）
 
-    デフォルト値を持ちつつ、必要な部分だけカスタマイズできる。
-    DRY原則を保ちながら、テストごとに柔軟にデータを作成可能。
+    デフォルトでは admin_user に紐付く UserBook を作成。
+    user_id を指定することで別ユーザーの UserBook を作成可能。
 
     使用例:
         book = book_factory(title="カスタム本", isbn="9781234567890")
+        book = book_factory(title="他ユーザーの本", user_id=other_user.id)
     """
-    from app.models import Book
+    from app.models import Book, UserBook
+    from app.schemas import BookStatus
 
     def _create_book(**kwargs):
-        """書籍を作成してDBに保存"""
-        # デフォルト値
-        defaults = {
+        """書籍と UserBook を作成してDBに保存"""
+        # UserBook 用パラメータを分離
+        user_id = kwargs.pop("user_id", admin_user.id)
+        note = kwargs.pop("note", None)
+        status = kwargs.pop("status", BookStatus.UNREAD.value)
+        shelf_id = kwargs.pop("shelf_id", None)
+
+        # Book 用デフォルト値
+        book_defaults = {
             "title": "テスト本",
             "author": "テスト著者",
             "description": "テスト説明",
-            "shelf_id": None,
         }
-        # 引数でデフォルト値を上書き
-        defaults.update(kwargs)
+        book_defaults.update(kwargs)
 
-        book = Book(**defaults)
+        # Book 作成
+        book = Book(**book_defaults)
         test_db.add(book)
+        test_db.flush()  # ID を取得
+
+        # UserBook 作成
+        user_book = UserBook(
+            user_id=user_id,
+            book_id=book.id,
+            note=note,
+            status=status,
+            shelf_id=shelf_id
+        )
+        test_db.add(user_book)
         test_db.commit()
-        test_db.refresh(book)  # DBから最新状態を取得（id, created_atなど）
+        test_db.refresh(book)
+        test_db.refresh(user_book)
+
+        # テストで使いやすくするため UserBook 情報を保存
+        book._user_book = user_book
         return book
 
     return _create_book
@@ -140,13 +162,13 @@ def book_factory(test_db):
 @pytest.fixture
 def sample_books(book_factory):
     """
-    よく使う2冊セットのサンプルデータ
+    よく使う2冊セットのサンプルデータ（admin user scoped）
 
     多くのテストで使える標準的なデータセット。
     個別のカスタマイズが不要な場合に便利。
 
     Returns:
-        list[Book]: 2冊の書籍リスト
+        list[Book]: 2冊の書籍リスト（各 Book に _user_book 属性あり）
     """
     book1 = book_factory(
         title="テスト本1",
@@ -161,6 +183,32 @@ def sample_books(book_factory):
         isbn="9780987654321"
     )
     return [book1, book2]
+
+
+@pytest.fixture
+def user_book_factory(test_db):
+    """UserBook 作成ファクトリフィクスチャ"""
+    from app.models import UserBook
+    from app.schemas import BookStatus
+
+    def _create_user_book(**kwargs):
+        if "user_id" not in kwargs or "book_id" not in kwargs:
+            raise ValueError("user_id and book_id are required for UserBook creation")
+
+        defaults = {
+            "note": None,
+            "status": BookStatus.UNREAD.value,
+            "shelf_id": None,
+        }
+        defaults.update(kwargs)
+
+        user_book = UserBook(**defaults)
+        test_db.add(user_book)
+        test_db.commit()
+        test_db.refresh(user_book)
+        return user_book
+
+    return _create_user_book
 
 
 @pytest.fixture

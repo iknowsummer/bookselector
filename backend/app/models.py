@@ -17,15 +17,8 @@ class Book(Base):
     target_age: Mapped[str | None] = mapped_column(String(50))
     isbn: Mapped[str | None] = mapped_column(String(13), unique=True)
     image_url: Mapped[str | None] = mapped_column(String(500))
-    note: Mapped[str | None] = mapped_column(Text())
-    status: Mapped[str] = mapped_column(
-        String(20), server_default=BookStatus.UNREAD.value, nullable=False, index=True
-    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
-    )
-    shelf_id: Mapped[int | None] = mapped_column(
-        ForeignKey("shelves.id", ondelete="SET NULL"), nullable=True
     )
 
 
@@ -57,4 +50,47 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class UserBook(Base):
+    __tablename__ = "user_books"
+    __table_args__ = (
+        UniqueConstraint("user_id", "book_id", name="uq_user_book"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    note: Mapped[str | None] = mapped_column(Text())
+    status: Mapped[str] = mapped_column(
+        String(20),
+        server_default=BookStatus.UNREAD.value,
+        nullable=False,
+        index=True
+    )
+    shelf_id: Mapped[int | None] = mapped_column(
+        ForeignKey("shelves.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
     )
