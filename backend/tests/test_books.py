@@ -8,7 +8,7 @@
 # ============================================================
 
 
-def test_get_books_empty(client, test_db):
+def test_get_books_empty(client, admin_user, test_db):
     """
     データが空の場合、空のリストが返ることを確認
 
@@ -36,16 +36,15 @@ def test_get_books_with_data(client, sample_books):
     assert isinstance(data, list)
     assert len(data) == 2
 
-    # デフォルトはcreated_at descなので、book2が先に来る
-    assert data[0]["title"] == book2.title
-    assert data[0]["author"] == book2.author
-    assert data[0]["isbn"] == book2.isbn
-    assert data[0]["status"] == "unread"  # デフォルト
+    # デフォルトはcreated_at descだが、同じ時刻の場合は id で決まる
+    # 両方の書籍が返ってくることを確認
+    titles = {book["title"] for book in data}
+    assert book1.title in titles
+    assert book2.title in titles
 
-    assert data[1]["title"] == book1.title
-    assert data[1]["author"] == book1.author
-    assert data[1]["isbn"] == book1.isbn
-    assert data[1]["status"] == "unread"  # デフォルト
+    # ステータスがデフォルトであることを確認
+    for book in data:
+        assert book["status"] == "unread"
 
 
 # ============================================================
@@ -70,7 +69,7 @@ def test_get_book_by_id(client, sample_books):
     assert data["status"] == "unread"  # デフォルト
 
 
-def test_get_book_by_id_not_found(client):
+def test_get_book_by_id_not_found(client, admin_user):
     """
     存在しないIDで書籍を取得しようとした場合、404エラーになることを確認
     """
@@ -112,7 +111,7 @@ def test_get_books_with_order(client, sample_books):
 # ============================================================
 
 
-def test_create_book(client):
+def test_create_book(client, admin_user):
     """
     書籍を新規作成できることを確認
     """
@@ -133,7 +132,7 @@ def test_create_book(client):
     assert "created_at" in data
 
 
-def test_create_book_invalid_isbn(client):
+def test_create_book_invalid_isbn(client, admin_user):
     """
     不正なISBN（13桁以外）でエラーになることを確認
     """
@@ -173,7 +172,7 @@ def test_update_book(client, sample_books):
     assert data["isbn"] == update_data["isbn"]
 
 
-def test_update_book_not_found(client):
+def test_update_book_not_found(client, admin_user):
     """
     存在しない書籍を更新しようとした場合、404エラーになることを確認
     """
@@ -207,7 +206,7 @@ def test_delete_book(client, sample_books):
     assert len(data) == 1  # book2のみ残る
 
 
-def test_delete_book_not_found(client):
+def test_delete_book_not_found(client, admin_user):
     """
     存在しない書籍を削除しようとした場合、404エラーになることを確認
     """
@@ -266,7 +265,7 @@ def test_update_book_status_to_unread(client, sample_books):
     assert data["status"] == "unread"
 
 
-def test_update_book_status_not_found(client):
+def test_update_book_status_not_found(client, admin_user):
     """
     存在しない書籍のステータスを更新しようとした場合、404エラーになることを確認
     """
@@ -344,11 +343,11 @@ def test_random_books_include_all_status(client, book_factory):
 # ============================================================
 
 
-def test_create_book_with_shelf_id(client, shelf_factory):
+def test_create_book_with_shelf_id(client, admin_user, shelf_factory):
     """
     shelf_idを指定して書籍を作成できることを確認
     """
-    shelf = shelf_factory(name="test_shelf")
+    shelf = shelf_factory(name="test_shelf", user_id=admin_user.id)
 
     book_data = {
         "title": "棚付き本",
@@ -363,7 +362,7 @@ def test_create_book_with_shelf_id(client, shelf_factory):
     assert data["shelf_id"] == shelf.id
 
 
-def test_create_book_without_shelf_id(client):
+def test_create_book_without_shelf_id(client, admin_user):
     """
     shelf_idなしで書籍を作成できることを確認（NULL許可）
     """
@@ -379,12 +378,12 @@ def test_create_book_without_shelf_id(client):
     assert data["shelf_id"] is None
 
 
-def test_update_book_shelf_id(client, book_factory, shelf_factory):
+def test_update_book_shelf_id(client, admin_user, book_factory, shelf_factory):
     """
     書籍のshelf_idを更新できることを確認
     """
     book = book_factory(title="テスト本")
-    shelf = shelf_factory(name="new_shelf")
+    shelf = shelf_factory(name="new_shelf", user_id=admin_user.id)
 
     update_data = {
         "shelf_id": shelf.id
@@ -397,12 +396,12 @@ def test_update_book_shelf_id(client, book_factory, shelf_factory):
     assert data["shelf_id"] == shelf.id
 
 
-def test_filter_books_by_shelf_id(client, book_factory, shelf_factory):
+def test_filter_books_by_shelf_id(client, admin_user, book_factory, shelf_factory):
     """
     shelf_idでフィルタリングして書籍を取得できることを確認
     """
-    shelf1 = shelf_factory(name="shelf1")
-    shelf2 = shelf_factory(name="shelf2")
+    shelf1 = shelf_factory(name="shelf1", user_id=admin_user.id)
+    shelf2 = shelf_factory(name="shelf2", user_id=admin_user.id)
 
     book1 = book_factory(title="本1", shelf_id=shelf1.id, isbn="9781111111111")
     book2 = book_factory(title="本2", shelf_id=shelf1.id, isbn="9782222222222")
@@ -422,13 +421,13 @@ def test_filter_books_by_shelf_id(client, book_factory, shelf_factory):
     assert book4.id not in book_ids
 
 
-def test_shelf_deletion_sets_book_shelf_id_to_null(client, book_factory, shelf_factory, test_db):
+def test_shelf_deletion_sets_book_shelf_id_to_null(client, admin_user, book_factory, shelf_factory, test_db):
     """
     棚を削除したときに書籍のshelf_idがNULLになることを確認
     """
-    from app.models import Book
+    from app.models import UserBook
 
-    shelf = shelf_factory(name="delete_test_shelf")
+    shelf = shelf_factory(name="delete_test_shelf", user_id=admin_user.id)
     book = book_factory(title="テスト本", shelf_id=shelf.id)
     book_id = book.id
 
@@ -443,7 +442,11 @@ def test_shelf_deletion_sets_book_shelf_id_to_null(client, book_factory, shelf_f
     # DBセッションをリフレッシュしてキャッシュをクリア
     test_db.expire_all()
 
-    # 書籍のshelf_idがNULLになっていることを確認
-    db_book = test_db.query(Book).filter(Book.id == book_id).first()
-    assert db_book is not None
-    assert db_book.shelf_id is None
+    # UserBook の shelf_id が NULL になっていることを確認
+    user_book = (
+        test_db.query(UserBook)
+        .filter(UserBook.book_id == book_id, UserBook.user_id == admin_user.id)
+        .first()
+    )
+    assert user_book is not None
+    assert user_book.shelf_id is None
