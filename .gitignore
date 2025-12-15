@@ -29,5 +29,8 @@ venv.bak/
 
 *.db
 
+# data directory (exclude DB files but keep directory)
+data/*.db
+
 # node.js
 node_modules/

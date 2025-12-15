@@ -1,7 +1,8 @@
 import sqlite3
+import os
 
 # 設定
-DB_PATH = "backend/app/sqlite.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "sqlite.db")
 TABLE_NAME = "books"
 
 # 動作フラグ

@@ -195,8 +195,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000  # バックエンドAPIのURL
 ## データベース
 
 - SQLiteを使用
-- データベースファイル: `backend/app/sqlite.db`
-- バックアップ: `sqlite-bk.db`, `sqlite-bk2.db`
+- データベースファイル: `data/sqlite.db`
 - 初回起動時に自動的にテーブルが作成されます
 
 ### データモデル
