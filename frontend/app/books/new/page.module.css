@@ -1,0 +1,18 @@
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 32px auto;
+}
+
+.option-button {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+}
+
+.back-button-container {
+  text-align: center;
+  margin-top: 32px;
+}

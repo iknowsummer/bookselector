@@ -8,6 +8,7 @@ import BookForm from "@/app/books/_components/BookForm";
 import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
 import type { Book, BookFormData } from "@/types/book";
+import styles from "./page.module.css";
 
 export default function EditBookPage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function EditBookPage() {
         isLoading={isLoading}
       />
       {book && (
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <div className={styles["delete-section"]}>
           <DeleteButton
             bookId={book.id}
             bookTitle={book.title}

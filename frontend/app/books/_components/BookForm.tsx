@@ -7,6 +7,7 @@ import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
+import styles from "./BookForm.module.css";
 
 type BookFormProps = {
   initialData?: BookFormData;
@@ -148,25 +149,19 @@ export default function BookForm({
             </option>
           ))}
         </select>
-        {shelvesLoading && <span style={{ marginLeft: "8px", fontSize: "0.9em", color: "#666" }}>読み込み中...</span>}
+        {shelvesLoading && <span className={styles["loading-text"]}>読み込み中...</span>}
       </div>
 
       {formData.image_url && (
         <div className="form-group">
           <label>サムネイル</label>
-          <div style={{ marginTop: "8px" }}>
+          <div className={styles["thumbnail-container"]}>
             <Image
               src={formData.image_url}
               alt={formData.title || "書籍の画像"}
               width={128}
               height={192}
-              style={{
-                maxWidth: "128px",
-                maxHeight: "192px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                objectFit: "contain",
-              }}
+              className={styles["thumbnail-image"]}
             />
           </div>
         </div>
@@ -185,7 +180,7 @@ export default function BookForm({
       {error && <div className="error-message">{error}</div>}
 
       {onBackToIsbnInput && (
-        <div style={{ textAlign: "center", margin: "24px 0" }}>
+        <div className={styles["isbn-button-container"]}>
           <button type="button" onClick={onBackToIsbnInput}>
             ISBNで情報取得
           </button>

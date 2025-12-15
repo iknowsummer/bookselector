@@ -1,27 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import styles from "./page.module.css";
 
 export default function NewBookPage() {
   return (
     <div className="container">
       <h2>書籍登録</h2>
 
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        maxWidth: "400px",
-        margin: "32px auto"
-      }}>
+      <div className={styles["options-container"]}>
         <Link href="/books/new/scan">
           <button
             type="button"
-            style={{
-              width: "100%",
-              padding: "16px",
-              fontSize: "16px"
-            }}
+            className={styles["option-button"]}
           >
             バーコードスキャンで登録
           </button>
@@ -29,11 +20,7 @@ export default function NewBookPage() {
         <Link href="/books/new/isbn">
           <button
             type="button"
-            style={{
-              width: "100%",
-              padding: "16px",
-              fontSize: "16px"
-            }}
+            className={styles["option-button"]}
           >
             ISBNから登録
           </button>
@@ -41,18 +28,14 @@ export default function NewBookPage() {
         <Link href="/books/new/manual">
           <button
             type="button"
-            style={{
-              width: "100%",
-              padding: "16px",
-              fontSize: "16px"
-            }}
+            className={styles["option-button"]}
           >
             手動で登録
           </button>
         </Link>
       </div>
 
-      <div style={{ textAlign: "center", marginTop: "32px" }}>
+      <div className={styles["back-button-container"]}>
         <Link href="/books">
           <button type="button">戻る</button>
         </Link>
