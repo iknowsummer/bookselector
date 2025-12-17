@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { lookupBookByIsbn } from "@/lib/api/lookup";
 import IsbnInput, { cleanIsbn, isValidIsbn } from "@/app/books/_components/IsbnInput";
 import type { BookFormData } from "@/types/book";
-import styles from "./page.module.css";
 
 export default function IsbnInputPage() {
   const router = useRouter();
@@ -74,11 +73,11 @@ export default function IsbnInputPage() {
       <div className="isbn-input-form">
         <div className="form-group">
           <label>ISBN</label>
-          <p className={styles["helper-text"]}>
+          <p className="helper-text">
             ISBNを入力すると、書籍情報を自動取得できます
           </p>
-          <div className={styles["input-row"]}>
-            <div className={styles["input-wrapper"]} onKeyDown={handleKeyDown}>
+          <div className="input-row">
+            <div className="input-wrapper" onKeyDown={handleKeyDown}>
               <IsbnInput
                 value={isbn}
                 onChange={handleIsbnChange}
@@ -96,7 +95,7 @@ export default function IsbnInputPage() {
           {lookupError && <div className="error-message">{lookupError}</div>}
         </div>
 
-        <div className={styles["back-button-container"]}>
+        <div className="back-button-container">
           <button type="button" onClick={handleCancel}>
             戻る
           </button>

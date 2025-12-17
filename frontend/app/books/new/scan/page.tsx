@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { lookupBookByIsbn } from "@/lib/api/lookup";
 import BarcodeScanner from "@/app/books/_components/BarcodeScanner";
-import styles from "./page.module.css";
 
 export default function ScanPage() {
   const router = useRouter();
@@ -63,13 +62,13 @@ export default function ScanPage() {
   return (
     <div className="container">
       {isLookingUp ? (
-        <div className={styles["loading-container"]}>
+        <div className="loading-container">
           <p>書籍情報を取得中...</p>
         </div>
       ) : (
         <>
           {lookupError && (
-            <div className={styles["error-toast"]}>
+            <div className="error-toast">
               {lookupError}
             </div>
           )}

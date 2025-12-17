@@ -293,3 +293,90 @@ button:hover {
     color: #aaa;
   }
 }
+
+/* Section divider for home page */
+.section-divider {
+  border: 1px solid #eee;
+  margin: 2rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .section-divider {
+    border-color: #444;
+  }
+}
+
+/* Options container for book registration pages */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 32px auto;
+}
+
+.option-button {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+}
+
+/* Back button container - used across multiple pages */
+.back-button-container {
+  text-align: center;
+  margin-top: 32px;
+}
+
+/* Helper text for forms */
+.helper-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .helper-text {
+    color: #aaa;
+  }
+}
+
+/* Input row layout for forms */
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-wrapper {
+  flex: 1;
+}
+
+/* Loading container */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Error toast notification */
+.error-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background-color: #f44336;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Delete section for edit pages */
+.delete-section {
+  margin-top: 20px;
+  text-align: center;
+}
