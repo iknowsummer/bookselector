@@ -44,7 +44,7 @@ export default function EditBookPage() {
       <div className="container">
         <div className="error">エラー: {error}</div>
         <Link href="/books">
-          <button>書籍一覧に戻る</button>
+          <button className="button">書籍一覧に戻る</button>
         </Link>
       </div>
     );

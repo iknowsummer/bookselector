@@ -181,18 +181,18 @@ export default function BookForm({
 
       {onBackToIsbnInput && (
         <div className={styles["isbn-button-container"]}>
-          <button type="button" onClick={onBackToIsbnInput}>
+          <button type="button" onClick={onBackToIsbnInput} className="button">
             ISBNで情報取得
           </button>
         </div>
       )}
 
       <div className="form-actions">
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting} className="button">
           {isSubmitting ? `${submitLabel}中...` : submitLabel}
         </button>
         <Link href={cancelHref}>
-          <button type="button">キャンセル</button>
+          <button type="button" className="button">キャンセル</button>
         </Link>
       </div>
     </form>

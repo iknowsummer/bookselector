@@ -65,7 +65,7 @@ export default function BookDetail({ book, shelf }: BookDetailProps) {
 
       <div className="book-detail-actions">
         <Link href={`/books/${book.id}/edit`}>
-          <button>編集</button>
+          <button className="button">編集</button>
         </Link>
       </div>
     </div>

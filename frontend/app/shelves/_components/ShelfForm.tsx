@@ -71,7 +71,7 @@ export function ShelfForm({ initialData, onSubmit, submitLabel }: Props) {
       </label>
       {error && <div className="error">エラー: {error}</div>}
       <div className="form-actions">
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting} className="button">
           {isSubmitting ? "送信中..." : submitLabel}
         </button>
       </div>

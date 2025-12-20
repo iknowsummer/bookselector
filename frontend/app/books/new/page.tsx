@@ -11,7 +11,7 @@ export default function NewBookPage() {
         <Link href="/books/new/scan">
           <button
             type="button"
-            className="option-button"
+            className="button option-button"
           >
             バーコードスキャンで登録
           </button>
@@ -19,7 +19,7 @@ export default function NewBookPage() {
         <Link href="/books/new/isbn">
           <button
             type="button"
-            className="option-button"
+            className="button option-button"
           >
             ISBNから登録
           </button>
@@ -27,7 +27,7 @@ export default function NewBookPage() {
         <Link href="/books/new/manual">
           <button
             type="button"
-            className="option-button"
+            className="button option-button"
           >
             手動で登録
           </button>
@@ -36,7 +36,7 @@ export default function NewBookPage() {
 
       <div className="back-button-container">
         <Link href="/books">
-          <button type="button">戻る</button>
+          <button type="button" className="button">戻る</button>
         </Link>
       </div>
     </div>

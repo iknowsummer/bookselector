@@ -1,0 +1,42 @@
+/* ============================================
+   Navigation: グローバルナビゲーション
+   ============================================ */
+
+#global-nav {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 1rem;
+
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  li a {
+    color: var(--primary-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+    display: inline-block;
+
+    &:hover {
+      background-color: var(--primary-color);
+      color: #ffffff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      color: #ededed;
+
+      &:hover {
+        background-color: #2980b9;
+      }
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    border-bottom-color: #444;
+  }
+}

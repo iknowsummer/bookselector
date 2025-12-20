@@ -88,6 +88,7 @@ export default function IsbnInputPage() {
               type="button"
               onClick={handleIsbnLookup}
               disabled={isLookingUp || !isValidIsbn(isbn)}
+              className="button"
             >
               {isLookingUp ? "取得中..." : "情報取得"}
             </button>
@@ -96,7 +97,7 @@ export default function IsbnInputPage() {
         </div>
 
         <div className="back-button-container">
-          <button type="button" onClick={handleCancel}>
+          <button type="button" onClick={handleCancel} className="button">
             戻る
           </button>
         </div>

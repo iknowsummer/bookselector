@@ -27,7 +27,7 @@ export function ShelfDeleteButton({ onDelete }: Props) {
 
   return (
     <div className="shelf-delete">
-      <button type="button" onClick={handleClick} disabled={isDeleting}>
+      <button type="button" onClick={handleClick} disabled={isDeleting} className="button">
         {isDeleting ? "削除中..." : "棚を削除"}
       </button>
       {error && <div className="error">エラー: {error}</div>}
