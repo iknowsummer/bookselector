@@ -8,7 +8,7 @@ export default function Home() {
         <h2>ランダム取得</h2>
       </section>
       <RandomBookList />
-      <hr style={{ border: "1px solid #eee", margin: "2rem 0" }} />
+      <hr className="section-divider" />
       <section>
         <h2>最近の登録</h2>
         <LatestBookList limit={14} />

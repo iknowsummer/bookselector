@@ -62,31 +62,13 @@ export default function ScanPage() {
   return (
     <div className="container">
       {isLookingUp ? (
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: "16px"
-        }}>
+        <div className="loading-container">
           <p>書籍情報を取得中...</p>
         </div>
       ) : (
         <>
           {lookupError && (
-            <div style={{
-              position: "fixed",
-              top: "80px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 10000,
-              backgroundColor: "#f44336",
-              color: "white",
-              padding: "12px 24px",
-              borderRadius: "4px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-            }}>
+            <div className="error-toast">
               {lookupError}
             </div>
           )}

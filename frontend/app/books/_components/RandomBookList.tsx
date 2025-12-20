@@ -37,7 +37,7 @@ export default function RandomBookList({
     <section>
       <BookList books={books} error={error} isLoading={isLoading} />
       {showButton && (
-        <button type="button" onClick={handleFetchRandomBooks}>
+        <button type="button" onClick={handleFetchRandomBooks} className="button">
           ランダム再読込
         </button>
       )}
