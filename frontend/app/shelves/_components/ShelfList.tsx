@@ -1,20 +1,8 @@
 import Link from "next/link";
-import type { Shelf } from "@/types/shelf";
+import { fetchShelves } from "@/lib/api/shelves";
 
-type Props = {
-  shelves: Shelf[];
-  error?: string;
-  isLoading?: boolean;
-};
-
-export function ShelfList({ shelves, error, isLoading }: Props) {
-  if (isLoading) {
-    return <div>棚情報を取得中です...</div>;
-  }
-
-  if (error) {
-    return <div className="error">エラー: {error}</div>;
-  }
+export async function ShelfList() {
+  const shelves = await fetchShelves();
 
   if (shelves.length === 0) {
     return <div>登録済みの棚はありません</div>;
