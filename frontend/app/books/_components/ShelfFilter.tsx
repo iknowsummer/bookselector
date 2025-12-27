@@ -1,21 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Shelf } from "@/types/shelf";
+import { fetchShelves } from "@/lib/api/shelves";
 import styles from "./ShelfFilter.module.css";
 
 type ShelfFilterProps = {
   selectedShelfId: number | null | "unassigned";
   onShelfChange: (shelfId: number | null | "unassigned") => void;
-  shelves: Shelf[];
-  isLoading: boolean;
 };
 
 export default function ShelfFilter({
   selectedShelfId,
   onShelfChange,
-  shelves,
-  isLoading,
 }: ShelfFilterProps) {
+  const [shelves, setShelves] = useState<Shelf[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadShelves = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchShelves();
+        setShelves(data);
+      } catch (err) {
+        console.error("棚一覧の取得に失敗しました:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadShelves();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value === "") {
