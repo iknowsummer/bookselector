@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import type { Book } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchBooks } from "@/lib/api/books";
 import { fetchShelves } from "@/lib/api/shelves";
 import { BookList } from "@/app/books/_components/BookList";
 import ShelfFilter from "@/app/books/_components/ShelfFilter";
+import { ShelfParamReader } from "@/app/books/_components/ShelfParamReader";
 
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [books, setBooks] = useState<Book[]>([]);
   const [shelves, setShelves] = useState<Shelf[]>([]);
@@ -22,18 +22,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingShelves, setIsLoadingShelves] = useState<boolean>(true);
 
-  // URLパラメータから初期値を読み込む
-  useEffect(() => {
-    const shelfParam = searchParams.get("shelf");
-    if (shelfParam === "unassigned") {
-      setSelectedShelfId("unassigned");
-    } else if (shelfParam) {
-      const shelfId = parseInt(shelfParam, 10);
-      if (!isNaN(shelfId)) {
-        setSelectedShelfId(shelfId);
-      }
-    }
-  }, [searchParams]);
+  // ShelfParamReaderからのコールバック
+  const handleShelfRead = (shelfId: number | null | "unassigned") => {
+    setSelectedShelfId(shelfId);
+  };
 
   // 棚一覧を取得
   useEffect(() => {
@@ -87,6 +79,9 @@ export default function Home() {
 
   return (
     <div>
+      <Suspense fallback={null}>
+        <ShelfParamReader onShelfIdRead={handleShelfRead} />
+      </Suspense>
       <h2>書籍一覧</h2>
       <ShelfFilter
         selectedShelfId={selectedShelfId}
