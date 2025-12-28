@@ -1,34 +1,30 @@
-"use client";
-
-import { useState, Suspense } from "react";
-import { createBook } from "@/lib/api/books";
-import { formDataToBookCreate } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import type { BookFormData } from "@/types/book";
-import { BookParamReader } from "./_components/BookParamReader";
 
-export default function ManualEntryPage() {
-  const [initialData, setInitialData] = useState<BookFormData | undefined>(undefined);
+interface PageProps {
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
+}
 
-  const handleParamsRead = (data: BookFormData) => {
-    setInitialData(data);
-  };
+export default async function ManualEntryPage({ searchParams }: PageProps) {
+  const params = await searchParams;
 
-  const handleSubmit = async (formData: BookFormData) => {
-    await createBook(formDataToBookCreate(formData));
+  // URLパラメータからinitialDataを構築
+  const initialData: BookFormData = {
+    title: typeof params.title === "string" ? params.title : "",
+    author: typeof params.author === "string" ? params.author : "",
+    description:
+      typeof params.description === "string" ? params.description : "",
+    isbn: typeof params.isbn === "string" ? params.isbn : "",
+    image_url: typeof params.image_url === "string" ? params.image_url : "",
+    note: "",
   };
 
   return (
     <div className="container">
-      <Suspense fallback={null}>
-        <BookParamReader onParamsRead={handleParamsRead} />
-      </Suspense>
       <h2>書籍登録</h2>
-      <BookForm
-        initialData={initialData}
-        onSubmit={handleSubmit}
-        submitLabel="登録"
-      />
+      <BookForm initialData={initialData} submitLabel="登録" />
     </div>
   );
 }
