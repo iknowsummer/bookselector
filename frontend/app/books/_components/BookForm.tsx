@@ -7,11 +7,13 @@ import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
+import { createBook, updateBook } from "@/lib/api/books";
+import { formDataToBookCreate, formDataToBookUpdate } from "@/lib/api/bookTransformers";
 import styles from "./BookForm.module.css";
 
 type BookFormProps = {
   initialData?: BookFormData;
-  onSubmit: (data: BookFormData) => Promise<void>;
+  bookId?: number;
   submitLabel: string;
   isLoading?: boolean;
   onBackToIsbnInput?: () => void;
@@ -20,7 +22,7 @@ type BookFormProps = {
 
 export default function BookForm({
   initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
-  onSubmit,
+  bookId,
   submitLabel,
   isLoading = false,
   onBackToIsbnInput,
@@ -82,7 +84,15 @@ export default function BookForm({
         ...formData,
         isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
       };
-      await onSubmit(submittedData);
+
+      // bookIdの有無で新規/編集を判別
+      if (bookId !== undefined) {
+        // 編集処理
+        await updateBook(bookId, formDataToBookUpdate(submittedData));
+      } else {
+        // 新規作成処理
+        await createBook(formDataToBookCreate(submittedData));
+      }
 
       // 送信成功後にリダイレクト
       router.push(redirectTo);

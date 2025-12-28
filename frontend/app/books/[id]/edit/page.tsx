@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { fetchBook, updateBook } from "@/lib/api/books";
-import { bookToFormData, formDataToBookUpdate } from "@/lib/api/bookTransformers";
+import { fetchBook } from "@/lib/api/books";
+import { bookToFormData } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
@@ -33,11 +33,6 @@ export default function EditBookPage() {
     getData();
   }, [params.id]);
 
-  const handleSubmit = async (formData: BookFormData) => {
-    const id = Number(params.id);
-    await updateBook(id, formDataToBookUpdate(formData));
-  };
-
   if (error && !initialData) {
     return (
       <div className="container">
@@ -54,7 +49,7 @@ export default function EditBookPage() {
       <h2>書籍編集</h2>
       <BookForm
         initialData={initialData}
-        onSubmit={handleSubmit}
+        bookId={Number(params.id)}
         submitLabel="更新"
         redirectTo={`/books/${params.id}`}
         isLoading={isLoading}
