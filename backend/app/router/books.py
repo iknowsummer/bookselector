@@ -123,7 +123,7 @@ def read_books(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
     limit: int | None = Query(None, description="取得件数の上限"),
-    order_by: str = Query("created_at", description="ソート対象のフィールド"),
+    order_by: str | None = Query(None, description="ソート対象のフィールド"),
     order: str = Query("desc", description="ソート順序 (desc or asc)"),
     shelf_id: int | None = Query(None, description="特定の棚に所属する本のみを取得"),
     unassigned_only: bool = Query(False, description="棚未登録の本のみを取得"),
@@ -146,8 +146,12 @@ def read_books(
     elif shelf_id is not None:
         query = query.filter(UserBook.shelf_id == shelf_id)
 
-    # ソート処理（UserBook のカラムを優先）
-    if hasattr(UserBook, order_by):
+    # ソート処理（デフォルトは user_books の登録日）
+    if order_by is None:
+        order_column = UserBook.created_at
+    elif order_by == "created_at":
+        order_column = UserBook.created_at
+    elif hasattr(UserBook, order_by):
         order_column = getattr(UserBook, order_by)
     elif hasattr(Book, order_by):
         order_column = getattr(Book, order_by)
