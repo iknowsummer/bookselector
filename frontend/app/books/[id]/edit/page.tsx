@@ -36,7 +36,6 @@ export default function EditBookPage() {
   const handleSubmit = async (formData: BookFormData) => {
     const id = Number(params.id);
     await updateBook(id, formDataToBookUpdate(formData));
-    router.push(`/books/${id}`);
   };
 
   if (error && !initialData) {
@@ -57,7 +56,7 @@ export default function EditBookPage() {
         initialData={initialData}
         onSubmit={handleSubmit}
         submitLabel="更新"
-        cancelHref={`/books/${params.id}`}
+        redirectTo={`/books/${params.id}`}
         isLoading={isLoading}
       />
       {book && (
