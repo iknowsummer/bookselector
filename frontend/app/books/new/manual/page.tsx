@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import { createBook } from "@/lib/api/books";
 import { formDataToBookCreate } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
@@ -9,17 +8,7 @@ import type { BookFormData } from "@/types/book";
 import { BookParamReader } from "./_components/BookParamReader";
 
 export default function ManualEntryPage() {
-  const router = useRouter();
-
-  // URLパラメータから書籍情報を取得
-  const [initialData, setInitialData] = useState<BookFormData>({
-    title: "",
-    author: "",
-    description: "",
-    isbn: "",
-    image_url: "",
-    note: "",
-  });
+  const [initialData, setInitialData] = useState<BookFormData | undefined>(undefined);
 
   const handleParamsRead = (data: BookFormData) => {
     setInitialData(data);
@@ -27,7 +16,6 @@ export default function ManualEntryPage() {
 
   const handleSubmit = async (formData: BookFormData) => {
     await createBook(formDataToBookCreate(formData));
-    router.push("/books");
   };
 
   return (
@@ -40,7 +28,6 @@ export default function ManualEntryPage() {
         initialData={initialData}
         onSubmit={handleSubmit}
         submitLabel="登録"
-        cancelHref="/books/new"
       />
     </div>
   );

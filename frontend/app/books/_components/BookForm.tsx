@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
@@ -13,19 +13,20 @@ type BookFormProps = {
   initialData?: BookFormData;
   onSubmit: (data: BookFormData) => Promise<void>;
   submitLabel: string;
-  cancelHref: string;
   isLoading?: boolean;
   onBackToIsbnInput?: () => void;
+  redirectTo?: string;
 };
 
 export default function BookForm({
   initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
   onSubmit,
   submitLabel,
-  cancelHref,
   isLoading = false,
   onBackToIsbnInput,
+  redirectTo = "/books",
 }: BookFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,6 +83,9 @@ export default function BookForm({
         isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
       };
       await onSubmit(submittedData);
+
+      // 送信成功後にリダイレクト
+      router.push(redirectTo);
     } catch (err) {
       setError(`エラー: ${err}`);
     } finally {
@@ -191,9 +195,9 @@ export default function BookForm({
         <button type="submit" disabled={isSubmitting} className="button">
           {isSubmitting ? `${submitLabel}中...` : submitLabel}
         </button>
-        <Link href={cancelHref}>
-          <button type="button" className="button">キャンセル</button>
-        </Link>
+        <button type="button" onClick={() => router.back()} className="button">
+          キャンセル
+        </button>
       </div>
     </form>
   );
