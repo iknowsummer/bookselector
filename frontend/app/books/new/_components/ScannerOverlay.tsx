@@ -7,11 +7,7 @@ interface ScannerOverlayProps {
 export function ScannerOverlay({ isScanning }: ScannerOverlayProps) {
   return (
     <div className={styles.overlay}>
-      <div className={styles["guide-box"]}>
-        <div className={styles["guide-text"]}>
-          バーコードをここに合わせてください
-        </div>
-      </div>
+      <div className={styles["guide-text"]}>バーコードを中央に合わせて静止</div>
       {isScanning && <div className={styles.status}>スキャン中...</div>}
     </div>
   );

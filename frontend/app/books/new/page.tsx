@@ -64,7 +64,7 @@ export default function NewBookPage() {
   const displayError = scanError || lookupError;
 
   return (
-    <div className={styles.container}>
+    <>
       <h2 className={styles.title}>書籍登録</h2>
 
       <BarcodeScanner
@@ -75,6 +75,6 @@ export default function NewBookPage() {
       />
 
       <AlternativeButtons />
-    </div>
+    </>
   );
 }

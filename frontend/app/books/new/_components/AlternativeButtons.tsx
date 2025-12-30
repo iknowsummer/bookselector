@@ -20,7 +20,7 @@ export function AlternativeButtons() {
       <div className="back-button-container">
         <Link href="/books">
           <button type="button" className="button">
-            戻る
+            キャンセル
           </button>
         </Link>
       </div>
