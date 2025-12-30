@@ -12,6 +12,8 @@ export default function NewBookPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const hasScannedRef = useRef(false);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isScanning, setIsScanning] = useState(true);
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -20,6 +22,11 @@ export default function NewBookPage() {
 
   const handleScanSuccess = useCallback(
     async (scannedIsbn: string) => {
+      // スキャンタイムアウトのクリア
+      if (scanTimeoutRef.current) {
+        clearTimeout(scanTimeoutRef.current);
+      }
+
       // 前回エラーになったISBNと同じ場合はスキップ(無限ループ防止)
       if (scannedIsbn === failedIsbn) {
         setLookupError(
@@ -53,7 +60,10 @@ export default function NewBookPage() {
         setIsLookingUp(false);
 
         // エラーメッセージを5秒後に自動クリア
-        setTimeout(() => {
+        if (errorTimeoutRef.current) {
+          clearTimeout(errorTimeoutRef.current);
+        }
+        errorTimeoutRef.current = setTimeout(() => {
           setLookupError("");
           setFailedIsbn("");
         }, 5000);
@@ -66,9 +76,29 @@ export default function NewBookPage() {
     setLookupError(error);
   }, []);
 
+  const handleScanTimeout = useCallback(() => {
+    const videoElement = videoRef.current;
+
+    // ストリーム停止
+    if (videoElement?.srcObject) {
+      const stream = videoElement.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
+    }
+
+    // メッセージ表示してリロード
+    setLookupError("スキャナーを再起動します...");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }, []);
+
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
     codeReaderRef.current = codeReader;
+    const videoElement = videoRef.current;
 
     const startScanning = async () => {
       try {
@@ -112,6 +142,11 @@ export default function NewBookPage() {
             }
           }
         );
+
+        // タイマー設定: 60秒後に自動リセット
+        scanTimeoutRef.current = setTimeout(() => {
+          handleScanTimeout();
+        }, 60000);
       } catch (err) {
         console.error("Camera initialization error:", err);
         if (err instanceof Error) {
@@ -132,11 +167,28 @@ export default function NewBookPage() {
 
     // クリーンアップ
     return () => {
+      // スキャンタイムアウトのクリア
+      if (scanTimeoutRef.current) {
+        clearTimeout(scanTimeoutRef.current);
+      }
+
+      // エラータイムアウトのクリア
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+
+      // MediaStreamの明示的な停止
+      if (videoElement?.srcObject) {
+        const stream = videoElement.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      // コードリーダーのリセット
       if (codeReaderRef.current) {
         codeReaderRef.current.reset();
       }
     };
-  }, [handleScanSuccess, handleScanError]);
+  }, [handleScanSuccess, handleScanError, handleScanTimeout]);
 
   return (
     <div className={styles.container}>
