@@ -9,6 +9,7 @@ export interface UsBarcodeScannerOptions {
   onError: (error: string) => void;
   onTimeout: () => void;
   scanTimeoutMs?: number;
+  frameSkip?: number; // フレームスキップ設定（デフォルト: 2）
 }
 
 export function useBarcodeScanner({
@@ -16,11 +17,14 @@ export function useBarcodeScanner({
   onError,
   onTimeout,
   scanTimeoutMs = 60000,
+  frameSkip = 2, // デフォルト: 2フレームに1回解析
 }: UsBarcodeScannerOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const hasScannedRef = useRef(false);
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const frameCountRef = useRef(0); // フレームカウンタ
+  const lastErrorLogRef = useRef(0); // 最後のエラーログ時刻
 
   const handleScanTimeout = useCallback(() => {
     const videoElement = videoRef.current;
@@ -63,6 +67,14 @@ export function useBarcodeScanner({
           selectedDevice.deviceId,
           videoRef.current!,
           (result, error) => {
+            // フレームカウンタをインクリメント
+            frameCountRef.current += 1;
+
+            // フレームスキップ判定（frameSkip回に1回だけ処理）
+            if (frameCountRef.current % frameSkip !== 0) {
+              return;
+            }
+
             // 既にスキャン済みの場合は処理しない
             if (hasScannedRef.current) {
               return;
@@ -84,8 +96,13 @@ export function useBarcodeScanner({
               }
             }
 
+            // エラーログのスロットリング（1秒間隔）
             if (error && !(error instanceof NotFoundException)) {
-              console.error("Barcode scan error:", error);
+              const now = Date.now();
+              if (now - lastErrorLogRef.current > 1000) {
+                console.error("Barcode scan error:", error);
+                lastErrorLogRef.current = now;
+              }
             }
           }
         );
@@ -130,7 +147,7 @@ export function useBarcodeScanner({
         codeReaderRef.current.reset();
       }
     };
-  }, [onSuccess, onError, handleScanTimeout, scanTimeoutMs]);
+  }, [onSuccess, onError, handleScanTimeout, scanTimeoutMs, frameSkip]);
 
   return {
     videoRef,
