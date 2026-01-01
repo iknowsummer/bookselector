@@ -1,4 +1,4 @@
-import type { Book } from "@/types/book";
+import type { Book, BookCreatePayload, BookUpdatePayload } from "@/types/book";
 import { getApiBaseUrl } from "./client";
 
 export const fetchApiStatus = async (): Promise<string> => {
@@ -50,7 +50,7 @@ export const fetchLatestBooks = async (limit: number): Promise<Book[]> => {
 };
 
 export const createBook = async (
-  bookData: Omit<Book, "id">
+  bookData: BookCreatePayload
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
   const res = await fetch(`${apiBaseUrl}/books`, {
@@ -80,7 +80,7 @@ export const fetchBook = async (id: number): Promise<Book> => {
 
 export const updateBook = async (
   id: number,
-  bookData: Partial<Omit<Book, "id" | "status" | "created_at">>
+  bookData: BookUpdatePayload
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
   const res = await fetch(`${apiBaseUrl}/books/${id}`, {
@@ -123,4 +123,3 @@ export const updateBookStatus = async (
   }
   return await res.json();
 };
-

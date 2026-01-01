@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import BookForm from "@/app/books/_components/BookForm";
 import type { BookFormData } from "@/types/book";
 
@@ -9,6 +11,10 @@ interface PageProps {
 
 export default async function ManualEntryPage({ searchParams }: PageProps) {
   const params = await searchParams;
+
+  if (typeof params.isbn !== "string" || params.isbn.length === 0) {
+    redirect("/books/new/isbn");
+  }
 
   // URLパラメータからinitialDataを構築
   const initialData: BookFormData = {

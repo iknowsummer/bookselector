@@ -2,6 +2,8 @@
 /books/ エンドポイントのテスト
 """
 
+from app.lookup.schemas import GoogleBooksResponse
+from app.router import books as books_router
 
 # ============================================================
 # GET /books/ - 書籍一覧取得
@@ -111,23 +113,34 @@ def test_get_books_with_order(client, sample_books):
 # ============================================================
 
 
-def test_create_book(client, admin_user):
+def test_create_book(client, admin_user, monkeypatch):
     """
     書籍を新規作成できることを確認
     """
+
+    def mock_fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
+        return GoogleBooksResponse(
+            title="取得本",
+            author="取得著者",
+            description="取得説明",
+            isbn=isbn,
+            image_url=None,
+        )
+
+    monkeypatch.setattr(books_router, "fetch_book_by_isbn", mock_fetch_book_by_isbn)
+
     book_data = {
-        "title": "新しい本",
-        "author": "テスト著者",
-        "description": "テスト説明",
-        "isbn": "9781111111111"
+        "isbn": "9781111111111",
     }
     response = client.post("/books/", json=book_data)
     assert response.status_code == 200
 
     data = response.json()
-    assert data["title"] == book_data["title"]
-    assert data["author"] == book_data["author"]
+    assert data["title"] == "取得本"
+    assert data["author"] == "取得著者"
     assert data["isbn"] == book_data["isbn"]
+    assert data["note"] is None
+    assert data["status"] == "unread"
     assert "id" in data
     assert "created_at" in data
 
@@ -137,7 +150,6 @@ def test_create_book_invalid_isbn(client, admin_user):
     不正なISBN（13桁以外）でエラーになることを確認
     """
     book_data = {
-        "title": "新しい本",
         "isbn": "123"  # 13桁でない
     }
     response = client.post("/books/", json=book_data)
@@ -156,33 +168,25 @@ def test_update_book(client, sample_books):
     book1, _ = sample_books
 
     update_data = {
-        "title": "更新されたタイトル",
-        "author": "更新された著者",
-        "description": "更新された説明",
-        "isbn": "9789999999999"
+        "note": "更新されたメモ",
     }
 
     response = client.put(f"/books/{book1.id}", json=update_data)
-    assert response.status_code == 200
-
-    data = response.json()
-    assert data["id"] == book1.id
-    assert data["title"] == update_data["title"]
-    assert data["author"] == update_data["author"]
-    assert data["isbn"] == update_data["isbn"]
+    assert response.status_code == 400
+    assert response.json()["detail"] == "書籍情報は更新できません"
 
 
 def test_update_book_not_found(client, admin_user):
     """
-    存在しない書籍を更新しようとした場合、404エラーになることを確認
+    書籍更新が許可されていないことを確認
     """
     update_data = {
-        "title": "更新されたタイトル",
+        "note": "更新されたメモ",
     }
 
     response = client.put("/books/99999", json=update_data)
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Book not found"
+    assert response.status_code == 400
+    assert response.json()["detail"] == "書籍情報は更新できません"
 
 
 # ============================================================
@@ -343,38 +347,57 @@ def test_random_books_include_all_status(client, book_factory):
 # ============================================================
 
 
-def test_create_book_with_shelf_id(client, admin_user, shelf_factory):
+def test_create_book_with_shelf_id(client, admin_user, shelf_factory, monkeypatch):
     """
-    shelf_idを指定して書籍を作成できることを確認
+    shelf_idを指定せずに書誌情報のみ登録できることを確認
     """
-    shelf = shelf_factory(name="test_shelf", user_id=admin_user.id)
+    _ = shelf_factory(name="test_shelf", user_id=admin_user.id)
+
+    def mock_fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
+        return GoogleBooksResponse(
+            title="棚付き取得本",
+            author="取得著者",
+            description="取得説明",
+            isbn=isbn,
+            image_url=None,
+        )
+
+    monkeypatch.setattr(books_router, "fetch_book_by_isbn", mock_fetch_book_by_isbn)
 
     book_data = {
-        "title": "棚付き本",
-        "author": "テスト著者",
-        "shelf_id": shelf.id
+        "isbn": "9781111111111",
     }
     response = client.post("/books/", json=book_data)
     assert response.status_code == 200
 
     data = response.json()
-    assert data["title"] == book_data["title"]
-    assert data["shelf_id"] == shelf.id
+    assert data["title"] == "棚付き取得本"
+    assert data["shelf_id"] is None
 
 
-def test_create_book_without_shelf_id(client, admin_user):
+def test_create_book_without_shelf_id(client, admin_user, monkeypatch):
     """
-    shelf_idなしで書籍を作成できることを確認（NULL許可）
+    書誌情報のみ登録できることを確認
     """
+    def mock_fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
+        return GoogleBooksResponse(
+            title="棚なし取得本",
+            author="取得著者",
+            description="取得説明",
+            isbn=isbn,
+            image_url=None,
+        )
+
+    monkeypatch.setattr(books_router, "fetch_book_by_isbn", mock_fetch_book_by_isbn)
+
     book_data = {
-        "title": "棚なし本",
-        "author": "テスト著者",
+        "isbn": "9781111111112",
     }
     response = client.post("/books/", json=book_data)
     assert response.status_code == 200
 
     data = response.json()
-    assert data["title"] == book_data["title"]
+    assert data["title"] == "棚なし取得本"
     assert data["shelf_id"] is None
 
 

@@ -7,8 +7,13 @@ import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
-import { createBook, updateBook } from "@/lib/api/books";
-import { formDataToBookCreate, formDataToBookUpdate } from "@/lib/api/bookTransformers";
+import { createBook } from "@/lib/api/books";
+import { createUserBook, updateUserBook } from "@/lib/api/userBooks";
+import {
+  formDataToBookCreate,
+  formDataToUserBookCreate,
+  formDataToUserBookUpdate,
+} from "@/lib/api/bookTransformers";
 import styles from "./BookForm.module.css";
 
 type BookFormProps = {
@@ -87,11 +92,12 @@ export default function BookForm({
 
       // bookIdの有無で新規/編集を判別
       if (bookId !== undefined) {
-        // 編集処理
-        await updateBook(bookId, formDataToBookUpdate(submittedData));
+        // 編集処理（user_booksのみ）
+        await updateUserBook(bookId, formDataToUserBookUpdate(submittedData));
       } else {
-        // 新規作成処理
-        await createBook(formDataToBookCreate(submittedData));
+        // 新規作成処理（books -> user_books）
+        const createdBook = await createBook(formDataToBookCreate(submittedData));
+        await createUserBook(formDataToUserBookCreate(submittedData, createdBook.id));
       }
 
       // 送信成功後にリダイレクト
@@ -116,6 +122,7 @@ export default function BookForm({
           name="title"
           value={formData.title}
           onChange={handleChange}
+          readOnly
           required
         />
       </div>
@@ -127,6 +134,7 @@ export default function BookForm({
           name="author"
           value={formData.author ?? ""}
           onChange={handleChange}
+          readOnly
         />
       </div>
 
@@ -136,6 +144,7 @@ export default function BookForm({
           name="description"
           value={formData.description ?? ""}
           onChange={handleChange}
+          readOnly
           rows={4}
         />
       </div>
@@ -145,6 +154,7 @@ export default function BookForm({
         <IsbnInput
           value={formData.isbn ?? ""}
           onChange={handleIsbnChange}
+          readOnly
         />
       </div>
 

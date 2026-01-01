@@ -9,6 +9,7 @@ type IsbnInputProps = {
   required?: boolean;
   autoFocus?: boolean;
   name?: string;
+  readOnly?: boolean;
 };
 
 export default function IsbnInput({
@@ -18,6 +19,7 @@ export default function IsbnInput({
   required = false,
   autoFocus = false,
   name = "isbn",
+  readOnly = false,
 }: IsbnInputProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -38,6 +40,7 @@ export default function IsbnInput({
       inputMode="numeric"
       required={required}
       autoFocus={autoFocus}
+      readOnly={readOnly}
     />
   );
 }

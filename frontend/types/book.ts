@@ -23,3 +23,9 @@ export type BookFormData = {
   note: string | null;
   shelf_id?: number | null;
 };
+
+export type BookCreatePayload = {
+  isbn: string;
+};
+
+export type BookUpdatePayload = Record<string, never>;

@@ -14,6 +14,7 @@ from ..exceptions import (
     handle_database_error,
     handle_internal_error,
 )
+from ..lookup import fetch_book_by_isbn
 
 logger = logging.getLogger(__name__)
 
@@ -82,35 +83,33 @@ def create_book(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
-    logger.info(f"POST /books - Creating book: title='{book.title}' for user_id={current_user.id}")
+    logger.info(f"POST /books - Creating book: isbn='{book.isbn}' for user_id={current_user.id}")
 
     try:
+        existing_book = db.query(Book).filter(Book.isbn == book.isbn).first()
+        if existing_book:
+            logger.info(f"POST /books - Existing book found for isbn='{book.isbn}'")
+            return _build_book_response(existing_book, None)
+
+        book_info = fetch_book_by_isbn(book.isbn)
+
         # BookCreate から Book フィールドと UserBook フィールドを分離
-        book_data = book.model_dump()
-        user_book_data = {
-            "note": book_data.pop("note", None),
-            "status": book_data.pop("status", BookStatus.UNREAD).value if isinstance(book_data.get("status"), BookStatus) else book_data.pop("status", BookStatus.UNREAD.value),
-            "shelf_id": book_data.pop("shelf_id", None),
+        book_data = {
+            "title": book_info.title,
+            "author": book_info.author,
+            "description": book_info.description,
+            "isbn": book_info.isbn,
+            "image_url": book_info.image_url,
         }
 
         # Book 作成
         db_book = Book(**book_data)
         db.add(db_book)
-        db.flush()  # ID を取得
-
-        # UserBook 作成
-        db_user_book = UserBook(
-            user_id=current_user.id,
-            book_id=db_book.id,
-            **user_book_data
-        )
-        db.add(db_user_book)
         db.commit()
         db.refresh(db_book)
-        db.refresh(db_user_book)
 
         logger.info(f"POST /books - Successfully created book id={db_book.id}")
-        return _build_book_response(db_book, db_user_book)
+        return _build_book_response(db_book, None)
 
     except SQLAlchemyError as exc:
         db.rollback()
@@ -208,50 +207,7 @@ def update_book(
 ):
     logger.info(f"PUT /books/{id} - Updating book for user_id={current_user.id}")
 
-    try:
-        # Book と UserBook を取得
-        result = (
-            db.query(Book, UserBook)
-            .join(UserBook, Book.id == UserBook.book_id)
-            .filter(
-                Book.id == id,
-                UserBook.user_id == current_user.id
-            )
-            .first()
-        )
-
-        if not result:
-            logger.warning(f"PUT /books/{id} - Book not found (404)")
-            raise HTTPException(status_code=404, detail="Book not found")
-
-        db_book, db_user_book = result
-
-        # Book フィールドと UserBook フィールドを分離して更新
-        book_fields = {"title", "author", "description", "target_age", "isbn", "image_url"}
-        user_book_fields = {"note", "status", "shelf_id"}
-
-        for key, value in book.model_dump(exclude_unset=True).items():
-            if key in book_fields and value is not None:
-                setattr(db_book, key, value)
-            elif key in user_book_fields:
-                if key == "status" and isinstance(value, BookStatus):
-                    setattr(db_user_book, key, value.value)
-                elif value is not None:
-                    setattr(db_user_book, key, value)
-
-        db.commit()
-        db.refresh(db_book)
-        db.refresh(db_user_book)
-
-        logger.info(f"PUT /books/{id} - Successfully updated book")
-        return _build_book_response(db_book, db_user_book)
-
-    except HTTPException:
-        raise
-    except SQLAlchemyError as exc:
-        db.rollback()
-        logger.error(f"PUT /books/{id} - Database error: {str(exc)}", exc_info=True)
-        raise handle_database_error(exc, "book update") from exc
+    raise HTTPException(status_code=400, detail="書籍情報は更新できません")
 
 
 @router.delete("/books/{id}")
