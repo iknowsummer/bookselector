@@ -3,7 +3,7 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import IsbnInput, { cleanIsbn } from "./IsbnInput";
+import { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
@@ -70,13 +70,6 @@ export default function BookForm({
     }));
   };
 
-  const handleIsbnChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      isbn: value,
-    }));
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -117,45 +110,24 @@ export default function BookForm({
     <form onSubmit={handleSubmit} className="book-form">
       <div className="form-group">
         <label>タイトル *</label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          readOnly
-          required
-        />
+        <div className={styles["readonly-value"]}>{formData.title || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>著者</label>
-        <input
-          type="text"
-          name="author"
-          value={formData.author ?? ""}
-          onChange={handleChange}
-          readOnly
-        />
+        <div className={styles["readonly-value"]}>{formData.author || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>説明</label>
-        <textarea
-          name="description"
-          value={formData.description ?? ""}
-          onChange={handleChange}
-          readOnly
-          rows={4}
-        />
+        <div className={styles["readonly-value"]}>
+          {formData.description || "未設定"}
+        </div>
       </div>
 
       <div className="form-group">
         <label>ISBN</label>
-        <IsbnInput
-          value={formData.isbn ?? ""}
-          onChange={handleIsbnChange}
-          readOnly
-        />
+        <div className={styles["readonly-value"]}>{formData.isbn || "未設定"}</div>
       </div>
 
       <div className="form-group">
