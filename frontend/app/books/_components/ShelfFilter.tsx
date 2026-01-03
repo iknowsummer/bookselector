@@ -1,46 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Shelf } from "@/types/shelf";
-import { fetchShelves } from "@/lib/api/shelves";
 import styles from "./ShelfFilter.module.css";
 
 type ShelfFilterProps = {
+  shelves: Shelf[];
   selectedShelfId: number | null | "unassigned";
-  onShelfChange: (shelfId: number | null | "unassigned") => void;
 };
 
 export default function ShelfFilter({
+  shelves,
   selectedShelfId,
-  onShelfChange,
 }: ShelfFilterProps) {
-  const [shelves, setShelves] = useState<Shelf[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const loadShelves = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchShelves();
-        setShelves(data);
-      } catch (err) {
-        console.error("棚一覧の取得に失敗しました:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadShelves();
-  }, []);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === "") {
-      onShelfChange(null);
-    } else if (value === "unassigned") {
-      onShelfChange("unassigned");
-    } else {
-      onShelfChange(parseInt(value, 10));
+
+    const params = new URLSearchParams();
+    if (value === "unassigned") {
+      params.set("shelf", "unassigned");
+    } else if (value !== "") {
+      params.set("shelf", value);
     }
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `/books?${queryString}` : "/books";
+    router.push(newUrl, { scroll: false });
   };
 
   return (
@@ -52,7 +39,6 @@ export default function ShelfFilter({
         id="shelf-filter"
         value={selectedShelfId ?? ""}
         onChange={handleChange}
-        disabled={isLoading}
         className={styles.select}
       >
         <option value="">すべての棚</option>
