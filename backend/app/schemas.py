@@ -51,25 +51,19 @@ class BookBase(BaseModel):
         return validate_isbn_format(v)
 
 
-class BookCreate(BookBase):
-    status: BookStatus = BookStatus.UNREAD
-
-
-class BookUpdate(BaseModel):
-    title: str | None = None
-    author: str | None = None
-    description: str | None = None
-    target_age: str | None = None
-    isbn: str | None = None
-    image_url: str | None = None
-    note: str | None = None
-    status: BookStatus | None = None
-    shelf_id: int | None = None
+class BookCreate(BaseModel):
+    isbn: str
 
     @field_validator("isbn")
     @classmethod
     def validate_isbn(cls, v: str | None) -> str | None:
         return validate_isbn_format(v)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class BookUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 class BookRead(BookBase):
