@@ -4,19 +4,9 @@ import type { Book } from "@/types/book";
 
 type BookListProps = {
   books: Book[];
-  error?: string;
-  isLoading?: boolean;
 };
 
-export function BookList({ books, error, isLoading }: BookListProps) {
-  if (isLoading) {
-    return <div>書籍情報を取得中です...</div>;
-  }
-
-  if (error) {
-    return <div>エラー: {error}</div>;
-  }
-
+export function BookList({ books }: BookListProps) {
   if (books.length === 0) {
     return <div>書籍情報がありません</div>;
   }

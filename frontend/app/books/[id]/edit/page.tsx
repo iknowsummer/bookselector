@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { fetchBook, updateBook } from "@/lib/api/books";
-import { bookToFormData, formDataToBookUpdate } from "@/lib/api/bookTransformers";
+import { fetchBook } from "@/lib/api/books";
+import { bookToFormData } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import DeleteButton from "@/app/books/_components/DeleteButton";
 import Link from "next/link";
@@ -33,18 +33,12 @@ export default function EditBookPage() {
     getData();
   }, [params.id]);
 
-  const handleSubmit = async (formData: BookFormData) => {
-    const id = Number(params.id);
-    await updateBook(id, formDataToBookUpdate(formData));
-    router.push(`/books/${id}`);
-  };
-
   if (error && !initialData) {
     return (
       <div className="container">
         <div className="error">エラー: {error}</div>
         <Link href="/books">
-          <button>書籍一覧に戻る</button>
+          <button className="button">書籍一覧に戻る</button>
         </Link>
       </div>
     );
@@ -55,13 +49,13 @@ export default function EditBookPage() {
       <h2>書籍編集</h2>
       <BookForm
         initialData={initialData}
-        onSubmit={handleSubmit}
+        bookId={Number(params.id)}
         submitLabel="更新"
-        cancelHref={`/books/${params.id}`}
+        redirectTo={`/books/${params.id}`}
         isLoading={isLoading}
       />
       {book && (
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <div className="delete-section">
           <DeleteButton
             bookId={book.id}
             bookTitle={book.title}

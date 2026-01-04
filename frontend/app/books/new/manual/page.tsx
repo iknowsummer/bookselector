@@ -1,39 +1,36 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { createBook } from "@/lib/api/books";
-import { formDataToBookCreate } from "@/lib/api/bookTransformers";
 import BookForm from "@/app/books/_components/BookForm";
 import type { BookFormData } from "@/types/book";
 
-export default function ManualEntryPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+interface PageProps {
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
+}
 
-  // URLパラメータから書籍情報を取得
+export default async function ManualEntryPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
+  if (typeof params.isbn !== "string" || params.isbn.length === 0) {
+    redirect("/books/new/isbn");
+  }
+
+  // URLパラメータからinitialDataを構築
   const initialData: BookFormData = {
-    title: searchParams.get("title") || "",
-    author: searchParams.get("author") || "",
-    description: searchParams.get("description") || "",
-    isbn: searchParams.get("isbn") || "",
-    image_url: searchParams.get("image_url") || "",
+    title: typeof params.title === "string" ? params.title : "",
+    author: typeof params.author === "string" ? params.author : "",
+    description:
+      typeof params.description === "string" ? params.description : "",
+    isbn: typeof params.isbn === "string" ? params.isbn : "",
+    image_url: typeof params.image_url === "string" ? params.image_url : "",
     note: "",
-  };
-
-  const handleSubmit = async (formData: BookFormData) => {
-    await createBook(formDataToBookCreate(formData));
-    router.push("/books");
   };
 
   return (
     <div className="container">
       <h2>書籍登録</h2>
-      <BookForm
-        initialData={initialData}
-        onSubmit={handleSubmit}
-        submitLabel="登録"
-        cancelHref="/books/new"
-      />
+      <BookForm initialData={initialData} submitLabel="登録" />
     </div>
   );
 }

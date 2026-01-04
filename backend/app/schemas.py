@@ -51,31 +51,52 @@ class BookBase(BaseModel):
         return validate_isbn_format(v)
 
 
-class BookCreate(BookBase):
-    pass
-
-
-class BookUpdate(BaseModel):
-    title: str | None = None
-    author: str | None = None
-    description: str | None = None
-    target_age: str | None = None
-    isbn: str | None = None
-    image_url: str | None = None
-    note: str | None = None
-    status: BookStatus | None = None
-    shelf_id: int | None = None
+class BookCreate(BaseModel):
+    isbn: str
 
     @field_validator("isbn")
     @classmethod
     def validate_isbn(cls, v: str | None) -> str | None:
         return validate_isbn_format(v)
 
+    model_config = ConfigDict(extra="forbid")
+
+
+class BookUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
 
 class BookRead(BookBase):
     id: int
     status: BookStatus = BookStatus.UNREAD
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# UserBook スキーマ
+class UserBookBase(BaseModel):
+    note: str | None = None
+    status: BookStatus = BookStatus.UNREAD
+    shelf_id: int | None = None
+
+
+class UserBookCreate(UserBookBase):
+    book_id: int
+
+
+class UserBookUpdate(BaseModel):
+    note: str | None = None
+    status: BookStatus | None = None
+    shelf_id: int | None = None
+
+
+class UserBookRead(UserBookBase):
+    id: int
+    user_id: int
+    book_id: int
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -96,5 +117,26 @@ class ShelfUpdate(BaseModel):
 
 class ShelfRead(ShelfBase):
     id: int
+    user_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserBase(BaseModel):
+    name: str
+
+
+class UserCreate(UserBase):
+    pass
+
+
+class UserUpdate(BaseModel):
+    name: str | None = None
+
+
+class UserRead(UserBase):
+    id: int
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

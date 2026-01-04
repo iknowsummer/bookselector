@@ -18,7 +18,7 @@ export default function NewShelfPage() {
       <h2>棚の新規登録</h2>
       <ShelfForm onSubmit={handleSubmit} submitLabel="登録する" />
       <Link href="/shelves">
-        <button type="button">一覧に戻る</button>
+        <button type="button" className="button">一覧に戻る</button>
       </Link>
     </div>
   );

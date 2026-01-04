@@ -4,7 +4,7 @@ import os
 
 dir_base = os.path.dirname(__file__)
 CSV_PATH = os.path.join(dir_base, "../datafile/sample-books.csv")
-DB_PATH = os.path.join(dir_base, "..", "backend", "app", "sqlite.db")
+DB_PATH = os.path.join(dir_base, "..", "data", "sqlite.db")
 TABLE_NAME = "books"
 
 

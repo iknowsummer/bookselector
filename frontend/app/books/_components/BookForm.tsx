@@ -1,30 +1,39 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import IsbnInput, { cleanIsbn } from "./IsbnInput";
+import { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
+import { createBook } from "@/lib/api/books";
+import { createUserBook, updateUserBook } from "@/lib/api/userBooks";
+import {
+  formDataToBookCreate,
+  formDataToUserBookCreate,
+  formDataToUserBookUpdate,
+} from "@/lib/api/bookTransformers";
+import styles from "./BookForm.module.css";
 
 type BookFormProps = {
   initialData?: BookFormData;
-  onSubmit: (data: BookFormData) => Promise<void>;
+  bookId?: number;
   submitLabel: string;
-  cancelHref: string;
   isLoading?: boolean;
   onBackToIsbnInput?: () => void;
+  redirectTo?: string;
 };
 
 export default function BookForm({
   initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
-  onSubmit,
+  bookId,
   submitLabel,
-  cancelHref,
   isLoading = false,
   onBackToIsbnInput,
+  redirectTo = "/books",
 }: BookFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,13 +70,6 @@ export default function BookForm({
     }));
   };
 
-  const handleIsbnChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      isbn: value,
-    }));
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -80,7 +82,19 @@ export default function BookForm({
         ...formData,
         isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
       };
-      await onSubmit(submittedData);
+
+      // bookIdの有無で新規/編集を判別
+      if (bookId !== undefined) {
+        // 編集処理（user_booksのみ）
+        await updateUserBook(bookId, formDataToUserBookUpdate(submittedData));
+      } else {
+        // 新規作成処理（books -> user_books）
+        const createdBook = await createBook(formDataToBookCreate(submittedData));
+        await createUserBook(formDataToUserBookCreate(submittedData, createdBook.id));
+      }
+
+      // 送信成功後にリダイレクト
+      router.push(redirectTo);
     } catch (err) {
       setError(`エラー: ${err}`);
     } finally {
@@ -96,41 +110,24 @@ export default function BookForm({
     <form onSubmit={handleSubmit} className="book-form">
       <div className="form-group">
         <label>タイトル *</label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+        <div className={styles["readonly-value"]}>{formData.title || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>著者</label>
-        <input
-          type="text"
-          name="author"
-          value={formData.author ?? ""}
-          onChange={handleChange}
-        />
+        <div className={styles["readonly-value"]}>{formData.author || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>説明</label>
-        <textarea
-          name="description"
-          value={formData.description ?? ""}
-          onChange={handleChange}
-          rows={4}
-        />
+        <div className={styles["readonly-value"]}>
+          {formData.description || "未設定"}
+        </div>
       </div>
 
       <div className="form-group">
         <label>ISBN</label>
-        <IsbnInput
-          value={formData.isbn ?? ""}
-          onChange={handleIsbnChange}
-        />
+        <div className={styles["readonly-value"]}>{formData.isbn || "未設定"}</div>
       </div>
 
       <div className="form-group">
@@ -148,25 +145,19 @@ export default function BookForm({
             </option>
           ))}
         </select>
-        {shelvesLoading && <span style={{ marginLeft: "8px", fontSize: "0.9em", color: "#666" }}>読み込み中...</span>}
+        {shelvesLoading && <span className={styles["loading-text"]}>読み込み中...</span>}
       </div>
 
       {formData.image_url && (
         <div className="form-group">
           <label>サムネイル</label>
-          <div style={{ marginTop: "8px" }}>
+          <div className={styles["thumbnail-container"]}>
             <Image
               src={formData.image_url}
               alt={formData.title || "書籍の画像"}
               width={128}
               height={192}
-              style={{
-                maxWidth: "128px",
-                maxHeight: "192px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                objectFit: "contain",
-              }}
+              className={styles["thumbnail-image"]}
             />
           </div>
         </div>
@@ -185,20 +176,20 @@ export default function BookForm({
       {error && <div className="error-message">{error}</div>}
 
       {onBackToIsbnInput && (
-        <div style={{ textAlign: "center", margin: "24px 0" }}>
-          <button type="button" onClick={onBackToIsbnInput}>
+        <div className={styles["isbn-button-container"]}>
+          <button type="button" onClick={onBackToIsbnInput} className="button">
             ISBNで情報取得
           </button>
         </div>
       )}
 
       <div className="form-actions">
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting} className="button">
           {isSubmitting ? `${submitLabel}中...` : submitLabel}
         </button>
-        <Link href={cancelHref}>
-          <button type="button">キャンセル</button>
-        </Link>
+        <button type="button" onClick={() => router.back()} className="button">
+          キャンセル
+        </button>
       </div>
     </form>
   );

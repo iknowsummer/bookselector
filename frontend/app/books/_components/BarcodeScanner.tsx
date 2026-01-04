@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
+import styles from "./BarcodeScanner.module.css";
 
 interface BarcodeScannerProps {
   onScan: (isbn: string) => void;
@@ -101,26 +102,26 @@ export default function BarcodeScanner({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
+    <div className={styles["scanner-container"]}>
       {/* カメラプレビュー */}
       <video
         ref={videoRef}
-        className="w-full h-full object-cover"
+        className={styles.video}
         playsInline
       />
 
       {/* オーバーレイとガイド */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+      <div className={styles.overlay}>
         {/* スキャンガイド */}
-        <div className="relative w-64 h-40 border-4 border-white rounded-lg shadow-lg">
-          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded text-sm whitespace-nowrap">
+        <div className={styles["guide-box"]}>
+          <div className={styles["guide-text"]}>
             バーコードをここに合わせてください
           </div>
         </div>
 
         {/* ステータス表示 */}
         {isScanning && (
-          <div className="mt-8 bg-black bg-opacity-70 text-white px-6 py-3 rounded-lg">
+          <div className={styles.status}>
             スキャン中...
           </div>
         )}
@@ -129,7 +130,7 @@ export default function BarcodeScanner({
       {/* 閉じるボタン */}
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg pointer-events-auto hover:bg-opacity-90 transition-colors"
+        className={styles["close-button"]}
       >
         ✕ 閉じる
       </button>

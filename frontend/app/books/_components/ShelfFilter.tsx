@@ -1,42 +1,45 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Shelf } from "@/types/shelf";
+import styles from "./ShelfFilter.module.css";
 
 type ShelfFilterProps = {
-  selectedShelfId: number | null | "unassigned";
-  onShelfChange: (shelfId: number | null | "unassigned") => void;
   shelves: Shelf[];
-  isLoading: boolean;
+  selectedShelfId: number | null | "unassigned";
 };
 
 export default function ShelfFilter({
-  selectedShelfId,
-  onShelfChange,
   shelves,
-  isLoading,
+  selectedShelfId,
 }: ShelfFilterProps) {
+  const router = useRouter();
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === "") {
-      onShelfChange(null);
-    } else if (value === "unassigned") {
-      onShelfChange("unassigned");
-    } else {
-      onShelfChange(parseInt(value, 10));
+
+    const params = new URLSearchParams();
+    if (value === "unassigned") {
+      params.set("shelf", "unassigned");
+    } else if (value !== "") {
+      params.set("shelf", value);
     }
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `/books?${queryString}` : "/books";
+    router.push(newUrl, { scroll: false });
   };
 
   return (
-    <div className="mb-6">
-      <label htmlFor="shelf-filter" className="block text-sm font-medium mb-2">
+    <div className={styles.container}>
+      <label htmlFor="shelf-filter" className={styles.label}>
         書棚でフィルタ
       </label>
       <select
         id="shelf-filter"
         value={selectedShelfId ?? ""}
         onChange={handleChange}
-        disabled={isLoading}
-        className="block w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        className={styles.select}
       >
         <option value="">すべての棚</option>
         <option value="unassigned">未登録</option>

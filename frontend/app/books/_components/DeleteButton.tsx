@@ -43,7 +43,7 @@ export default function DeleteButton({
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="delete-button"
+      className="button"
     >
       {isDeleting ? "削除中..." : "削除"}
     </button>

@@ -58,7 +58,7 @@ export default function EditShelfPage() {
       />
       <ShelfDeleteButton onDelete={handleDelete} />
       <Link href="/shelves">
-        <button type="button">一覧に戻る</button>
+        <button type="button" className="button">一覧に戻る</button>
       </Link>
     </div>
   );
