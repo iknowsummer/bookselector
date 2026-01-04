@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { lookupBookByIsbn } from "@/lib/api/lookup";
-import IsbnInput, { cleanIsbn, isValidIsbn } from "@/app/books/_components/IsbnInput";
-import type { BookFormData } from "@/types/book";
+import IsbnInput, {
+  cleanIsbn,
+  isValidIsbn,
+} from "@/app/books/_components/IsbnInput";
 
 export default function IsbnInputPage() {
   const router = useRouter();
@@ -78,11 +80,7 @@ export default function IsbnInputPage() {
           </p>
           <div className="input-row">
             <div className="input-wrapper" onKeyDown={handleKeyDown}>
-              <IsbnInput
-                value={isbn}
-                onChange={handleIsbnChange}
-                autoFocus
-              />
+              <IsbnInput value={isbn} onChange={handleIsbnChange} autoFocus />
             </div>
             <button
               type="button"

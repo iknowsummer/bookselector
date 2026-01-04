@@ -1,31 +1,34 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import IsbnInput, { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
+import { createBook, updateBook } from "@/lib/api/books";
+import { formDataToBookCreate, formDataToBookUpdate } from "@/lib/api/bookTransformers";
 import styles from "./BookForm.module.css";
 
 type BookFormProps = {
   initialData?: BookFormData;
-  onSubmit: (data: BookFormData) => Promise<void>;
+  bookId?: number;
   submitLabel: string;
-  cancelHref: string;
   isLoading?: boolean;
   onBackToIsbnInput?: () => void;
+  redirectTo?: string;
 };
 
 export default function BookForm({
   initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
-  onSubmit,
+  bookId,
   submitLabel,
-  cancelHref,
   isLoading = false,
   onBackToIsbnInput,
+  redirectTo = "/books",
 }: BookFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<BookFormData>(initialData);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +84,18 @@ export default function BookForm({
         ...formData,
         isbn: formData.isbn ? cleanIsbn(formData.isbn) : null,
       };
-      await onSubmit(submittedData);
+
+      // bookIdの有無で新規/編集を判別
+      if (bookId !== undefined) {
+        // 編集処理
+        await updateBook(bookId, formDataToBookUpdate(submittedData));
+      } else {
+        // 新規作成処理
+        await createBook(formDataToBookCreate(submittedData));
+      }
+
+      // 送信成功後にリダイレクト
+      router.push(redirectTo);
     } catch (err) {
       setError(`エラー: ${err}`);
     } finally {
@@ -191,9 +205,9 @@ export default function BookForm({
         <button type="submit" disabled={isSubmitting} className="button">
           {isSubmitting ? `${submitLabel}中...` : submitLabel}
         </button>
-        <Link href={cancelHref}>
-          <button type="button" className="button">キャンセル</button>
-        </Link>
+        <button type="button" onClick={() => router.back()} className="button">
+          キャンセル
+        </button>
       </div>
     </form>
   );
