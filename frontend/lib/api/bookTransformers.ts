@@ -1,4 +1,5 @@
-import type { Book, BookFormData } from "@/types/book";
+import type { Book, BookCreatePayload, BookFormData } from "@/types/book";
+import type { UserBookCreatePayload, UserBookUpdatePayload } from "@/types/userBook";
 
 /**
  * Book型からBookFormData型へ変換
@@ -20,34 +21,34 @@ export function bookToFormData(book: Book): BookFormData {
  * BookFormDataをAPI更新用のデータ形式に変換
  * 空文字列をnullに変換してバックエンドの期待する形式にする
  */
-export function formDataToBookUpdate(formData: BookFormData): {
-  title: string;
-  author: string | null;
-  description: string | null;
-  isbn: string | null;
-  image_url: string | null;
-  note: string | null;
-  shelf_id: number | null;
-} {
+export function formDataToBookCreate(formData: BookFormData): BookCreatePayload {
   return {
-    title: formData.title,
-    author: formData.author || null,
-    description: formData.description || null,
-    isbn: formData.isbn || null,
-    image_url: formData.image_url || null,
+    isbn: formData.isbn || "",
+  };
+}
+
+/**
+ * BookFormDataをuser_books作成用データに変換
+ */
+export function formDataToUserBookCreate(
+  formData: BookFormData,
+  bookId: number
+): UserBookCreatePayload {
+  return {
+    book_id: bookId,
     note: formData.note || null,
     shelf_id: formData.shelf_id ?? null,
   };
 }
 
 /**
- * BookFormDataをAPI作成用のBook形式に変換
- * 新規作成時に必要なフィールドを追加
+ * BookFormDataをuser_books更新用データに変換
  */
-export function formDataToBookCreate(formData: BookFormData): Omit<Book, "id"> {
+export function formDataToUserBookUpdate(
+  formData: BookFormData
+): UserBookUpdatePayload {
   return {
-    ...formDataToBookUpdate(formData),
-    status: "unread",
-    created_at: new Date().toISOString(),
+    note: formData.note || null,
+    shelf_id: formData.shelf_id ?? null,
   };
 }

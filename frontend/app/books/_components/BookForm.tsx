@@ -3,12 +3,17 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import IsbnInput, { cleanIsbn } from "./IsbnInput";
+import { cleanIsbn } from "./IsbnInput";
 import type { BookFormData } from "@/types/book";
 import type { Shelf } from "@/types/shelf";
 import { fetchShelves } from "@/lib/api/shelves";
-import { createBook, updateBook } from "@/lib/api/books";
-import { formDataToBookCreate, formDataToBookUpdate } from "@/lib/api/bookTransformers";
+import { createBook } from "@/lib/api/books";
+import { createUserBook, updateUserBook } from "@/lib/api/userBooks";
+import {
+  formDataToBookCreate,
+  formDataToUserBookCreate,
+  formDataToUserBookUpdate,
+} from "@/lib/api/bookTransformers";
 import styles from "./BookForm.module.css";
 
 type BookFormProps = {
@@ -65,13 +70,6 @@ export default function BookForm({
     }));
   };
 
-  const handleIsbnChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      isbn: value,
-    }));
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -87,11 +85,12 @@ export default function BookForm({
 
       // bookIdの有無で新規/編集を判別
       if (bookId !== undefined) {
-        // 編集処理
-        await updateBook(bookId, formDataToBookUpdate(submittedData));
+        // 編集処理（user_booksのみ）
+        await updateUserBook(bookId, formDataToUserBookUpdate(submittedData));
       } else {
-        // 新規作成処理
-        await createBook(formDataToBookCreate(submittedData));
+        // 新規作成処理（books -> user_books）
+        const createdBook = await createBook(formDataToBookCreate(submittedData));
+        await createUserBook(formDataToUserBookCreate(submittedData, createdBook.id));
       }
 
       // 送信成功後にリダイレクト
@@ -111,41 +110,24 @@ export default function BookForm({
     <form onSubmit={handleSubmit} className="book-form">
       <div className="form-group">
         <label>タイトル *</label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+        <div className={styles["readonly-value"]}>{formData.title || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>著者</label>
-        <input
-          type="text"
-          name="author"
-          value={formData.author ?? ""}
-          onChange={handleChange}
-        />
+        <div className={styles["readonly-value"]}>{formData.author || "未設定"}</div>
       </div>
 
       <div className="form-group">
         <label>説明</label>
-        <textarea
-          name="description"
-          value={formData.description ?? ""}
-          onChange={handleChange}
-          rows={4}
-        />
+        <div className={styles["readonly-value"]}>
+          {formData.description || "未設定"}
+        </div>
       </div>
 
       <div className="form-group">
         <label>ISBN</label>
-        <IsbnInput
-          value={formData.isbn ?? ""}
-          onChange={handleIsbnChange}
-        />
+        <div className={styles["readonly-value"]}>{formData.isbn || "未設定"}</div>
       </div>
 
       <div className="form-group">

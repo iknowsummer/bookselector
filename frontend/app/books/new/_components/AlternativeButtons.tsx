@@ -10,11 +10,6 @@ export function AlternativeButtons() {
             ISBNで登録
           </button>
         </Link>
-        <Link href="/books/new/manual">
-          <button type="button" className={`button ${styles["alt-button"]}`}>
-            手動で登録
-          </button>
-        </Link>
       </div>
 
       <div className="back-button-container">
