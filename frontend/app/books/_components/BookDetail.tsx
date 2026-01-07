@@ -31,7 +31,6 @@ export default function BookDetail({ book, shelf }: BookDetailProps) {
 
         <div className="book-detail-info">
           <div className="info-row">
-            <span className="info-label">著者:</span>
             <span>{book.author}</span>
           </div>
 
@@ -42,17 +41,16 @@ export default function BookDetail({ book, shelf }: BookDetailProps) {
             </div>
           )}
 
+          {book.description && (
+            <div className="info-row">
+              <p>{book.description}</p>
+            </div>
+          )}
+
           <div className="info-row">
             <span className="info-label">棚:</span>
             <span>{shelf ? shelf.name : "未設定"}</span>
           </div>
-
-          {book.description && (
-            <div className="info-row">
-              <span className="info-label">説明:</span>
-              <p>{book.description}</p>
-            </div>
-          )}
 
           {book.note && (
             <div className="info-row">
