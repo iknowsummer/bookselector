@@ -26,7 +26,15 @@ type BookFormProps = {
 };
 
 export default function BookForm({
-  initialData = { title: "", author: "", description: "", isbn: "", image_url: "", note: "", shelf_id: null },
+  initialData = {
+    title: "",
+    author: "",
+    description: "",
+    isbn: "",
+    image_url: "",
+    note: "",
+    shelf_id: null,
+  },
   bookId,
   submitLabel,
   isLoading = false,
@@ -89,8 +97,12 @@ export default function BookForm({
         await updateUserBook(bookId, formDataToUserBookUpdate(submittedData));
       } else {
         // 新規作成処理（books -> user_books）
-        const createdBook = await createBook(formDataToBookCreate(submittedData));
-        await createUserBook(formDataToUserBookCreate(submittedData, createdBook.id));
+        const createdBook = await createBook(
+          formDataToBookCreate(submittedData)
+        );
+        await createUserBook(
+          formDataToUserBookCreate(submittedData, createdBook.id)
+        );
       }
 
       // 送信成功後にリダイレクト
@@ -108,26 +120,43 @@ export default function BookForm({
 
   return (
     <form onSubmit={handleSubmit} className="book-form">
+      {formData.image_url && (
+        <div className="form-group">
+          <div className={styles["thumbnail-container"]}>
+            <Image
+              src={formData.image_url}
+              alt={formData.title || "書籍の画像"}
+              width={128}
+              height={192}
+              className={styles["thumbnail-image"]}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="form-group">
-        <label>タイトル *</label>
-        <div className={styles["readonly-value"]}>{formData.title || "未設定"}</div>
+        <div className={styles["readonly-value"]}>
+          {formData.title || "未設定"}
+        </div>
       </div>
 
       <div className="form-group">
-        <label>著者</label>
-        <div className={styles["readonly-value"]}>{formData.author || "未設定"}</div>
+        <div className={styles["readonly-value"]}>
+          {formData.author || "未設定"}
+        </div>
       </div>
 
       <div className="form-group">
-        <label>説明</label>
         <div className={styles["readonly-value"]}>
           {formData.description || "未設定"}
         </div>
       </div>
 
       <div className="form-group">
-        <label>ISBN</label>
-        <div className={styles["readonly-value"]}>{formData.isbn || "未設定"}</div>
+        <span>ISBN</span>
+        <span className={styles["readonly-value"]}>
+          {formData.isbn || "未設定"}
+        </span>
       </div>
 
       <div className="form-group">
@@ -145,31 +174,19 @@ export default function BookForm({
             </option>
           ))}
         </select>
-        {shelvesLoading && <span className={styles["loading-text"]}>読み込み中...</span>}
+        {shelvesLoading && (
+          <span className={styles["loading-text"]}>読み込み中...</span>
+        )}
       </div>
 
-      {formData.image_url && (
-        <div className="form-group">
-          <label>サムネイル</label>
-          <div className={styles["thumbnail-container"]}>
-            <Image
-              src={formData.image_url}
-              alt={formData.title || "書籍の画像"}
-              width={128}
-              height={192}
-              className={styles["thumbnail-image"]}
-            />
-          </div>
-        </div>
-      )}
-
       <div className="form-group">
-        <label>メモ</label>
+        <div>メモ</div>
         <textarea
           name="note"
           value={formData.note ?? ""}
           onChange={handleChange}
-          rows={4}
+          rows={10}
+          cols={60}
         />
       </div>
 
