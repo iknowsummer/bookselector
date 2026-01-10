@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..auth import get_current_user
 from ..models import User
 from ..schemas import UserCreate, UserRead, UserUpdate
 from ..exceptions import handle_database_error, handle_internal_error
@@ -15,9 +16,12 @@ router = APIRouter()
 
 
 @router.get("/users/", response_model=list[UserRead])
-def read_users(db: Session = Depends(get_db)):
+def read_users(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     """ユーザー一覧を取得"""
-    logger.info("GET /users - Fetching user list")
+    logger.info("GET /users - Fetching user list (sub=%s)", current_user.get("sub"))
     users = db.query(User).order_by(User.id.asc()).all()
     logger.info("GET /users - Retrieved %s users", len(users))
     return users
