@@ -38,6 +38,11 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     """ユーザーを新規作成"""
     logger.info("POST /users - Creating user: name='%s'", user.name)
+    if not user.auth0_sub or not user.email:
+        raise HTTPException(
+            status_code=400,
+            detail="auth0_sub と email は必須です"
+        )
     try:
         db_user = User(**user.model_dump())
         db.add(db_user)

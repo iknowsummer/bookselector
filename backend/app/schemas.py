@@ -125,6 +125,8 @@ class ShelfRead(ShelfBase):
 
 class UserBase(BaseModel):
     name: str
+    auth0_sub: str | None = None
+    email: str | None = None
 
 
 class UserCreate(UserBase):
@@ -133,6 +135,8 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     name: str | None = None
+    auth0_sub: str | None = None
+    email: str | None = None
 
 
 class UserRead(UserBase):
