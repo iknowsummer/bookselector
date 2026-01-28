@@ -12,6 +12,7 @@ def test_engine():
     各テスト関数ごとに新しいデータベースを作成
     """
     from app.database import Base
+
     # モデルをインポートしてBaseに登録されるようにする
     from app import models  # noqa: F401
 
@@ -72,8 +73,9 @@ def test_db(test_engine):
         yield db
     finally:
         db.close()
-        # テスト終了時にオーバーライドをクリア
-        app.dependency_overrides.clear()
+        # テスト終了時にget_dbのオーバーライドのみ削除
+        # （他のオーバーライドを壊さないよう、clear()は使わない）
+        app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture(scope="function")
@@ -145,7 +147,7 @@ def book_factory(test_db, admin_user):
             book_id=book.id,
             note=note,
             status=status,
-            shelf_id=shelf_id
+            shelf_id=shelf_id,
         )
         test_db.add(user_book)
         test_db.commit()
@@ -171,16 +173,10 @@ def sample_books(book_factory):
         list[Book]: 2冊の書籍リスト（各 Book に _user_book 属性あり）
     """
     book1 = book_factory(
-        title="テスト本1",
-        author="著者1",
-        description="説明1",
-        isbn="9781234567890"
+        title="テスト本1", author="著者1", description="説明1", isbn="9781234567890"
     )
     book2 = book_factory(
-        title="テスト本2",
-        author="著者2",
-        description="説明2",
-        isbn="9780987654321"
+        title="テスト本2", author="著者2", description="説明2", isbn="9780987654321"
     )
     return [book1, book2]
 
@@ -251,9 +247,14 @@ def user_factory(test_db):
     """ユーザー作成ファクトリフィクスチャ"""
     from app.models import User
 
+    _counter = [0]  # ユニークなauth0_sub生成用カウンター
+
     def _create_user(**kwargs):
+        _counter[0] += 1
         defaults = {
             "name": "テストユーザー",
+            "auth0_sub": f"auth0|test_user_{_counter[0]}",
+            "email": f"test{_counter[0]}@example.com",
         }
         defaults.update(kwargs)
 
@@ -267,6 +268,32 @@ def user_factory(test_db):
 
 
 @pytest.fixture
-def admin_user(user_factory):
-    """Admin user fixture (id=1) for Phase 1 user context."""
-    return user_factory(name="admin")
+def mock_jwt_payload():
+    """モックJWTペイロード"""
+    return {
+        "sub": "auth0|test_admin_user",
+        "email": "admin@example.com",
+        "name": "Test Admin",
+    }
+
+
+@pytest.fixture(autouse=True)
+def override_jwt_bearer(mock_jwt_payload):
+    """全テストでJWT検証をバイパス"""
+    from app.auth import jwt_bearer
+    from app.main import app
+
+    # jwt_bearerインスタンスの__call__をオーバーライド
+    app.dependency_overrides[jwt_bearer] = lambda: mock_jwt_payload
+    yield
+    app.dependency_overrides.pop(jwt_bearer, None)
+
+
+@pytest.fixture
+def admin_user(user_factory, mock_jwt_payload):
+    """Admin user fixture - mock_jwt_payloadのsubと一致するユーザーを作成"""
+    return user_factory(
+        name="admin",
+        auth0_sub=mock_jwt_payload["sub"],
+        email=mock_jwt_payload["email"],
+    )

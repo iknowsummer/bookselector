@@ -163,15 +163,12 @@ def test_create_book_invalid_isbn(client, admin_user):
 
 def test_update_book(client, sample_books):
     """
-    書籍を更新できることを確認
+    書籍更新が許可されていないことを確認
+    (BookUpdateスキーマにはフィールドがないため空のボディを送る)
     """
     book1, _ = sample_books
 
-    update_data = {
-        "note": "更新されたメモ",
-    }
-
-    response = client.put(f"/books/{book1.id}", json=update_data)
+    response = client.put(f"/books/{book1.id}", json={})
     assert response.status_code == 400
     assert response.json()["detail"] == "書籍情報は更新できません"
 
@@ -180,11 +177,7 @@ def test_update_book_not_found(client, admin_user):
     """
     書籍更新が許可されていないことを確認
     """
-    update_data = {
-        "note": "更新されたメモ",
-    }
-
-    response = client.put("/books/99999", json=update_data)
+    response = client.put("/books/99999", json={})
     assert response.status_code == 400
     assert response.json()["detail"] == "書籍情報は更新できません"
 
@@ -404,15 +397,14 @@ def test_create_book_without_shelf_id(client, admin_user, monkeypatch):
 def test_update_book_shelf_id(client, admin_user, book_factory, shelf_factory):
     """
     書籍のshelf_idを更新できることを確認
+    (UserBookのshelf_idはPUT /user-books/{book_id}で更新する)
     """
     book = book_factory(title="テスト本")
     shelf = shelf_factory(name="new_shelf", user_id=admin_user.id)
 
-    update_data = {
-        "shelf_id": shelf.id
-    }
+    update_data = {"shelf_id": shelf.id}
 
-    response = client.put(f"/books/{book.id}", json=update_data)
+    response = client.put(f"/user-books/{book.id}", json=update_data)
     assert response.status_code == 200
 
     data = response.json()
