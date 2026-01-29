@@ -10,7 +10,6 @@ from .router import (
     books_router,
     admin_router,
     shelves_router,
-    users_router,
     user_books_router,
     lookup_router,
 )
@@ -44,6 +43,5 @@ Base.metadata.create_all(bind=engine)
 app.include_router(admin_router)
 app.include_router(books_router)
 app.include_router(shelves_router)
-app.include_router(users_router)
 app.include_router(user_books_router)
 app.include_router(lookup_router)

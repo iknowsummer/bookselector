@@ -1,9 +1,10 @@
 import type { Shelf, ShelfFormData } from "@/types/shelf";
 import { getApiBaseUrl } from "./client";
+import { authenticatedFetch } from "./authenticatedFetch";
 
 export const fetchShelves = async (): Promise<Shelf[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/shelves/`);
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/`);
   if (!res.ok) {
     throw new Error("棚情報の取得に失敗しました");
   }
@@ -12,7 +13,7 @@ export const fetchShelves = async (): Promise<Shelf[]> => {
 
 export const fetchShelf = async (id: number): Promise<Shelf> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/shelves/${id}`);
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/${id}`);
   if (!res.ok) {
     if (res.status === 404) {
       throw new Error("棚が見つかりません");
@@ -24,11 +25,8 @@ export const fetchShelf = async (id: number): Promise<Shelf> => {
 
 export const createShelf = async (formData: ShelfFormData): Promise<Shelf> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/shelves/`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(formData),
   });
   if (!res.ok) {
@@ -42,11 +40,8 @@ export const updateShelf = async (
   formData: Partial<ShelfFormData>
 ): Promise<Shelf> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/shelves/${id}`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(formData),
   });
   if (!res.ok) {
@@ -60,7 +55,7 @@ export const updateShelf = async (
 
 export const deleteShelf = async (id: number): Promise<void> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/shelves/${id}`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) {
