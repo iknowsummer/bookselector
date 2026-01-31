@@ -1,7 +1,15 @@
 import RandomBookList from "@/app/books/_components/RandomBookList";
 import LatestBookList from "@/app/books/_components/LatestBookList";
+import LoginPrompt from "@/app/components/LoginPrompt";
+import { auth0 } from "@/lib/auth0";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth0.getSession();
+
+  if (!session) {
+    return <LoginPrompt showDescription={true} title="ログインして始めましょう" />;
+  }
+
   return (
     <>
       <section>

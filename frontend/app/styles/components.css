@@ -138,3 +138,46 @@
   margin-top: 20px;
   text-align: center;
 }
+
+/* Login Prompt Styles */
+.login-prompt {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.site-description {
+  margin-bottom: 2rem;
+  text-align: left;
+
+  h2 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  ul {
+    margin-left: 1.5rem;
+    line-height: 1.8;
+  }
+}
+
+.login-message {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+
+  p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: #2a2a2a;
+  }
+}

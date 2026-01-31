@@ -4,6 +4,8 @@ import { fetchBooks } from "@/lib/api/books";
 import { fetchShelves } from "@/lib/api/shelves";
 import { BookList } from "@/app/books/_components/BookList";
 import ShelfFilter from "@/app/books/_components/ShelfFilter";
+import LoginPrompt from "@/app/components/LoginPrompt";
+import { auth0 } from "@/lib/auth0";
 
 interface PageProps {
   searchParams: Promise<{
@@ -12,6 +14,12 @@ interface PageProps {
 }
 
 export default async function BooksPage({ searchParams }: PageProps) {
+  const session = await auth0.getSession();
+
+  if (!session) {
+    return <LoginPrompt title="書籍一覧を見るにはログインが必要です" />;
+  }
+
   const params = await searchParams;
 
   // searchParamsからshelfパラメータを抽出
