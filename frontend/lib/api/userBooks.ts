@@ -1,15 +1,13 @@
 import { getApiBaseUrl } from "./client";
 import type { UserBook, UserBookCreatePayload, UserBookUpdatePayload } from "@/types/userBook";
+import { authenticatedFetch } from "./authenticatedFetch";
 
 export const createUserBook = async (
   payload: UserBookCreatePayload
 ): Promise<UserBook> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/user-books`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/user-books`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -23,11 +21,8 @@ export const updateUserBook = async (
   payload: UserBookUpdatePayload
 ): Promise<UserBook> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/user-books/${bookId}`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/user-books/${bookId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {

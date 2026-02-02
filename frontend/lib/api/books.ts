@@ -1,9 +1,10 @@
 import type { Book, BookCreatePayload, BookUpdatePayload } from "@/types/book";
 import { getApiBaseUrl } from "./client";
+import { authenticatedFetch } from "./authenticatedFetch";
 
 export const fetchApiStatus = async (): Promise<string> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(apiBaseUrl);
+  const res = await authenticatedFetch(apiBaseUrl);
   if (!res.ok) {
     throw new Error("APIの取得に失敗しました");
   }
@@ -12,7 +13,7 @@ export const fetchApiStatus = async (): Promise<string> => {
 
 export const fetchRandomBooks = async (): Promise<Book[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/random`);
+  const res = await authenticatedFetch(`${apiBaseUrl}/books/random`);
   if (!res.ok) {
     throw new Error("書籍情報の取得に失敗しました");
   }
@@ -31,7 +32,7 @@ export const fetchBooks = async (
     url += `?shelf_id=${shelfId}`;
   }
 
-  const res = await fetch(url);
+  const res = await authenticatedFetch(url);
   if (!res.ok) {
     throw new Error("書籍情報の取得に失敗しました");
   }
@@ -40,7 +41,7 @@ export const fetchBooks = async (
 
 export const fetchLatestBooks = async (limit: number): Promise<Book[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(
+  const res = await authenticatedFetch(
     `${apiBaseUrl}/books?limit=${limit}&order_by=created_at&order=desc`
   );
   if (!res.ok) {
@@ -53,11 +54,8 @@ export const createBook = async (
   bookData: BookCreatePayload
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/books`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(bookData),
   });
   if (!res.ok) {
@@ -68,7 +66,7 @@ export const createBook = async (
 
 export const fetchBook = async (id: number): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/${id}`);
+  const res = await authenticatedFetch(`${apiBaseUrl}/books/${id}`);
   if (!res.ok) {
     if (res.status === 404) {
       throw new Error("書籍が見つかりません");
@@ -83,11 +81,8 @@ export const updateBook = async (
   bookData: BookUpdatePayload
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/${id}`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/books/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(bookData),
   });
   if (!res.ok) {
@@ -98,7 +93,7 @@ export const updateBook = async (
 
 export const deleteBook = async (id: number): Promise<void> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/${id}`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/books/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) {
@@ -111,11 +106,8 @@ export const updateBookStatus = async (
   status: "unread" | "picked" | "read"
 ): Promise<Book> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await fetch(`${apiBaseUrl}/books/${id}/status`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/books/${id}/status`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ status }),
   });
   if (!res.ok) {

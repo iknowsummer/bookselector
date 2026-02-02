@@ -31,9 +31,17 @@ export default function LatestBookList({ limit = 12 }: LatestBookListProps) {
     loadLatestBooks();
   }, [limit]);
 
+  if (isLoading) {
+    return <section>読み込み中...</section>;
+  }
+
+  if (error) {
+    return <section>{error}</section>;
+  }
+
   return (
     <section>
-      <BookList books={books} error={error} isLoading={isLoading} />
+      <BookList books={books} />
     </section>
   );
 }

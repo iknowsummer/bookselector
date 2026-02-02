@@ -33,9 +33,17 @@ export default function RandomBookList({
     handleFetchRandomBooks();
   }, []);
 
+  if (isLoading) {
+    return <section>読み込み中...</section>;
+  }
+
+  if (error) {
+    return <section>{error}</section>;
+  }
+
   return (
     <section>
-      <BookList books={books} error={error} isLoading={isLoading} />
+      <BookList books={books} />
       {showButton && (
         <button type="button" onClick={handleFetchRandomBooks} className="button">
           ランダム再読込

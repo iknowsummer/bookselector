@@ -128,7 +128,8 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    auth0_sub: str
+    email: str | None = None
 
 
 class UserUpdate(BaseModel):
