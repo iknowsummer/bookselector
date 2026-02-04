@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 
 from .database import Base, engine
 from .middleware import AccessLogMiddleware
+from .logging_config import setup_logging
 from .router import (
     books_router,
     admin_router,
@@ -17,9 +19,9 @@ from .router import (
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+# ロギング設定（コンソール + ファイル出力）
+log_dir = Path(__file__).parent.parent / "logs"
+setup_logging(log_dir=str(log_dir))
 
 logger = logging.getLogger(__name__)
 

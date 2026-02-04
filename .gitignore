@@ -29,6 +29,10 @@ venv.bak/
 
 *.db
 
+# Logs
+logs/
+*.log
+
 # data directory (exclude DB files but keep directory)
 data/*.db
 
