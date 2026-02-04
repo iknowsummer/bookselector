@@ -3,6 +3,7 @@
 
 外部APIから書籍情報を検索する
 """
+
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -40,10 +41,7 @@ def lookup_book_by_isbn_endpoint(isbn: str):
         validate_isbn_format(isbn)
     except ValueError as e:
         logger.warning(f"GET /lookup/isbn/{isbn} - Invalid ISBN format (400)")
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
 
     try:
         # Google Books API経由で書籍情報を取得
@@ -55,5 +53,7 @@ def lookup_book_by_isbn_endpoint(isbn: str):
         # fetch_book_by_isbnから返されたHTTPExceptionはそのまま伝播
         raise
     except Exception as exc:
-        logger.error(f"GET /lookup/isbn/{isbn} - Unexpected error: {str(exc)}", exc_info=True)
+        logger.error(
+            f"GET /lookup/isbn/{isbn} - Unexpected error: {str(exc)}", exc_info=True
+        )
         raise handle_internal_error(exc, "ISBN lookup") from exc

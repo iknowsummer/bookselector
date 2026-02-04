@@ -26,10 +26,7 @@ def create_user_book(
 
         existing = (
             db.query(UserBook)
-            .filter(
-                UserBook.user_id == user_id,
-                UserBook.book_id == payload.book_id
-            )
+            .filter(UserBook.user_id == user_id, UserBook.book_id == payload.book_id)
             .first()
         )
         if existing:
@@ -40,14 +37,18 @@ def create_user_book(
             user_id=user_id,
             book_id=payload.book_id,
             note=payload.note,
-            status=payload.status.value if isinstance(payload.status, BookStatus) else payload.status,
+            status=payload.status.value
+            if isinstance(payload.status, BookStatus)
+            else payload.status,
             shelf_id=payload.shelf_id,
         )
         db.add(user_book)
         db.commit()
         db.refresh(user_book)
 
-        logger.info(f"POST /user-books - Successfully created user_book id={user_book.id}")
+        logger.info(
+            f"POST /user-books - Successfully created user_book id={user_book.id}"
+        )
         return user_book
 
     except HTTPException:
@@ -69,10 +70,7 @@ def update_user_book(
     try:
         user_book = (
             db.query(UserBook)
-            .filter(
-                UserBook.user_id == user_id,
-                UserBook.book_id == book_id
-            )
+            .filter(UserBook.user_id == user_id, UserBook.book_id == book_id)
             .first()
         )
 
@@ -96,7 +94,9 @@ def update_user_book(
         raise
     except SQLAlchemyError as exc:
         db.rollback()
-        logger.error(f"PUT /user-books/{book_id} - Database error: {str(exc)}", exc_info=True)
+        logger.error(
+            f"PUT /user-books/{book_id} - Database error: {str(exc)}", exc_info=True
+        )
         raise handle_database_error(exc, "user book update") from exc
 
 
@@ -105,15 +105,14 @@ def delete_user_book(
     user_id: int,
     db: Session,
 ) -> dict:
-    logger.info(f"DELETE /user-books/{book_id} - Deleting user book for user_id={user_id}")
+    logger.info(
+        f"DELETE /user-books/{book_id} - Deleting user book for user_id={user_id}"
+    )
 
     try:
         user_book = (
             db.query(UserBook)
-            .filter(
-                UserBook.user_id == user_id,
-                UserBook.book_id == book_id
-            )
+            .filter(UserBook.user_id == user_id, UserBook.book_id == book_id)
             .first()
         )
 
@@ -131,5 +130,7 @@ def delete_user_book(
         raise
     except SQLAlchemyError as exc:
         db.rollback()
-        logger.error(f"DELETE /user-books/{book_id} - Database error: {str(exc)}", exc_info=True)
+        logger.error(
+            f"DELETE /user-books/{book_id} - Database error: {str(exc)}", exc_info=True
+        )
         raise handle_database_error(exc, "user book deletion") from exc

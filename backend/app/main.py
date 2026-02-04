@@ -17,8 +17,7 @@ from .router import (
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 logger = logging.getLogger(__name__)

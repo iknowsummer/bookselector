@@ -44,7 +44,9 @@ def _build_book_response(book: Book, user_book: UserBook | None) -> dict:
 def random_books(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-    include_all_status: int = Query(0, description="1で全ステータスを含める。デフォルトはunreadのみ。"),
+    include_all_status: int = Query(
+        0, description="1で全ステータスを含める。デフォルトはunreadのみ。"
+    ),
 ):
     logger.info(
         f"GET /books/random - user_id={current_user.id}, include_all_status={include_all_status}"
@@ -83,7 +85,9 @@ def create_book(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
-    logger.info(f"POST /books - Creating book: isbn='{book.isbn}' for user_id={current_user.id}")
+    logger.info(
+        f"POST /books - Creating book: isbn='{book.isbn}' for user_id={current_user.id}"
+    )
 
     try:
         existing_book = db.query(Book).filter(Book.isbn == book.isbn).first()
@@ -186,10 +190,7 @@ def read_book(
     result = (
         db.query(Book, UserBook)
         .join(UserBook, Book.id == UserBook.book_id)
-        .filter(
-            Book.id == id,
-            UserBook.user_id == current_user.id
-        )
+        .filter(Book.id == id, UserBook.user_id == current_user.id)
         .first()
     )
 
@@ -226,10 +227,7 @@ def delete_book(
         # UserBook を取得
         user_book = (
             db.query(UserBook)
-            .filter(
-                UserBook.book_id == id,
-                UserBook.user_id == current_user.id
-            )
+            .filter(UserBook.book_id == id, UserBook.user_id == current_user.id)
             .first()
         )
 
@@ -264,16 +262,15 @@ def update_book_status(
 
     status: "unread", "picked", "read" のいずれか
     """
-    logger.info(f"PATCH /books/{id}/status - Updating status to '{status.value}' for user_id={current_user.id}")
+    logger.info(
+        f"PATCH /books/{id}/status - Updating status to '{status.value}' for user_id={current_user.id}"
+    )
 
     try:
         result = (
             db.query(Book, UserBook)
             .join(UserBook, Book.id == UserBook.book_id)
-            .filter(
-                Book.id == id,
-                UserBook.user_id == current_user.id
-            )
+            .filter(Book.id == id, UserBook.user_id == current_user.id)
             .first()
         )
 
@@ -295,5 +292,7 @@ def update_book_status(
         raise
     except SQLAlchemyError as exc:
         db.rollback()
-        logger.error(f"PATCH /books/{id}/status - Database error: {str(exc)}", exc_info=True)
+        logger.error(
+            f"PATCH /books/{id}/status - Database error: {str(exc)}", exc_info=True
+        )
         raise handle_database_error(exc, "book status update") from exc

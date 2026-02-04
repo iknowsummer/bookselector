@@ -44,12 +44,16 @@ def get_db_status(db: Session = Depends(get_db)):
             # レコードがない場合はNoneを返す
             last_modified = None
 
-        logger.info(f"GET /db-status - Last modified: {last_modified}, Books: {book_count}")
+        logger.info(
+            f"GET /db-status - Last modified: {last_modified}, Books: {book_count}"
+        )
 
-        return {
-            "last_modified": last_modified,
-            "record_count": book_count
-        }
+        return {"last_modified": last_modified, "record_count": book_count}
     except Exception as exc:
-        logger.error(f"GET /db-status - Error retrieving database status: {str(exc)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to retrieve database status")
+        logger.error(
+            f"GET /db-status - Error retrieving database status: {str(exc)}",
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve database status"
+        )

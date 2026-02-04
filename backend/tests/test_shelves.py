@@ -73,7 +73,9 @@ def test_delete_shelf_not_found(client: TestClient, admin_user):
 # New tests for user isolation
 
 
-def test_shelf_names_unique_per_user(client: TestClient, user_factory, shelf_factory, admin_user):
+def test_shelf_names_unique_per_user(
+    client: TestClient, user_factory, shelf_factory, admin_user
+):
     """Shelf names are unique per user, not globally"""
     user2 = user_factory(name="user2")
 
@@ -84,7 +86,9 @@ def test_shelf_names_unique_per_user(client: TestClient, user_factory, shelf_fac
     assert shelf1.user_id != shelf2.user_id
 
 
-def test_shelf_names_must_be_unique_within_user(client: TestClient, shelf_factory, admin_user, test_db):
+def test_shelf_names_must_be_unique_within_user(
+    client: TestClient, shelf_factory, admin_user, test_db
+):
     """Same user cannot create duplicate shelf names"""
     from sqlalchemy.exc import IntegrityError
 
@@ -94,10 +98,14 @@ def test_shelf_names_must_be_unique_within_user(client: TestClient, shelf_factor
         shelf_factory(user_id=admin_user.id, name="living", memo="Second")
 
 
-def test_get_shelves_only_returns_user_shelves(client: TestClient, user_factory, shelf_factory, admin_user):
+def test_get_shelves_only_returns_user_shelves(
+    client: TestClient, user_factory, shelf_factory, admin_user
+):
     """GET /shelves/ only returns current user's shelves"""
     user2 = user_factory(name="user2")
-    shelf_factory(user_id=user2.id, name="user2_shelf")  # Create but don't need reference
+    shelf_factory(
+        user_id=user2.id, name="user2_shelf"
+    )  # Create but don't need reference
     admin_shelf = shelf_factory(user_id=admin_user.id, name="admin_shelf")
 
     response = client.get("/shelves/")
@@ -108,18 +116,25 @@ def test_get_shelves_only_returns_user_shelves(client: TestClient, user_factory,
     assert data[0]["id"] == admin_shelf.id
 
 
-def test_user_cannot_access_other_user_shelf(client: TestClient, user_factory, shelf_factory, admin_user):
+def test_user_cannot_access_other_user_shelf(
+    client: TestClient, user_factory, shelf_factory, admin_user
+):
     """User cannot GET/PUT/DELETE another user's shelf"""
     user2 = user_factory(name="user2")
     user2_shelf = shelf_factory(user_id=user2.id, name="user2_private")
 
     # Admin tries to access user2's shelf (should fail)
     assert client.get(f"/shelves/{user2_shelf.id}").status_code == 404
-    assert client.put(f"/shelves/{user2_shelf.id}", json={"name": "hacked"}).status_code == 404
+    assert (
+        client.put(f"/shelves/{user2_shelf.id}", json={"name": "hacked"}).status_code
+        == 404
+    )
     assert client.delete(f"/shelves/{user2_shelf.id}").status_code == 404
 
 
-def test_user_deletion_cascades_to_shelves(client: TestClient, user_factory, shelf_factory, test_db):
+def test_user_deletion_cascades_to_shelves(
+    client: TestClient, user_factory, shelf_factory, test_db
+):
     """Deleting user deletes their shelves (CASCADE)"""
     from app.models import Shelf
 
