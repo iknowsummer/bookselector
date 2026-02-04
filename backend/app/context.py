@@ -1,6 +1,5 @@
 """APIリクエストのユーザーコンテキスト管理"""
 
-import logging
 from typing import Annotated
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -8,8 +7,6 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 from .auth import jwt_bearer
-
-logger = logging.getLogger(__name__)
 
 
 def get_current_user(
@@ -34,7 +31,6 @@ def get_current_user(
     auth0_sub = token_payload.get("sub")
 
     if not auth0_sub:
-        logger.error("JWT検証成功したがsubクレームがない")
         raise HTTPException(status_code=401, detail="ユーザー識別子がありません")
 
     # auth0_subでユーザーを検索
@@ -57,10 +53,8 @@ def get_current_user(
             db.add(user)
             db.commit()
             db.refresh(user)
-            logger.info(f"新規ユーザーを作成: auth0_sub={auth0_sub}")
         except Exception as e:
             db.rollback()
-            logger.error(f"ユーザー作成エラー: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="ユーザーの作成に失敗しました")
 
     return user

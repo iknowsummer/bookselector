@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from .database import Base, engine
+from .middleware import AccessLogMiddleware
 from .router import (
     books_router,
     admin_router,
@@ -23,6 +24,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+# アクセスログミドルウェア（最初に登録 = 最後に実行）
+app.add_middleware(AccessLogMiddleware)
 
 # CORS設定
 cors_origins = os.getenv("BACKEND_CORS_ORIGINS", "").split(",")

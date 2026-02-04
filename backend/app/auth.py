@@ -51,6 +51,10 @@ class JWTBearer(HTTPBearer):
         Raises:
             HTTPException: 認証失敗時
         """
+        # ミドルウェアで検証済みの場合はスキップ
+        if hasattr(request.state, "jwt_payload") and request.state.jwt_payload:
+            return request.state.jwt_payload
+
         credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(
             request
         )
@@ -130,3 +134,17 @@ class JWTBearer(HTTPBearer):
 
 # シングルトンインスタンス
 jwt_bearer = JWTBearer()
+
+
+def verify_token_safe(token: str) -> Optional[dict]:
+    """
+    例外を投げずにJWT検証を行う（ミドルウェア用）
+
+    Returns:
+        dict: 検証成功時のペイロード
+        None: 検証失敗時
+    """
+    try:
+        return jwt_bearer._verify_token(token)
+    except Exception:
+        return None

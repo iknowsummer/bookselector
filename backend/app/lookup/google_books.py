@@ -4,13 +4,10 @@ Google Books API連携モジュール
 ISBNから書籍情報を取得してGoogleBooksResponseスキーマに変換する
 """
 
-import logging
 import requests
 from fastapi import HTTPException
 
 from .schemas import GoogleBooksResponse
-
-logger = logging.getLogger(__name__)
 
 
 def fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
@@ -27,8 +24,6 @@ def fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
         HTTPException 404: 書籍が見つからない
         HTTPException 500: API接続エラー
     """
-    logger.info(f"Fetching book info from Google Books API - ISBN: {isbn}")
-
     try:
         # Google Books APIにリクエスト
         url = "https://www.googleapis.com/books/v1/volumes"
@@ -43,7 +38,6 @@ def fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
         items = data.get("items", [])
 
         if not items:
-            logger.warning(f"No book found for ISBN: {isbn}")
             raise HTTPException(
                 status_code=404, detail=f"Book not found for ISBN: {isbn}"
             )
@@ -82,23 +76,15 @@ def fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
             image_url=image_url,
         )
 
-        logger.info(f"Successfully fetched book info for ISBN: {isbn}")
         return book_data
 
     except HTTPException:
         raise
     except requests.exceptions.RequestException as exc:
-        logger.error(
-            f"Google Books API error for ISBN {isbn}: {str(exc)}", exc_info=True
-        )
         raise HTTPException(
             status_code=500, detail="Google Books APIへの接続に失敗しました"
         ) from exc
     except Exception as exc:
-        logger.error(
-            f"Unexpected error while fetching book for ISBN {isbn}: {str(exc)}",
-            exc_info=True,
-        )
         raise HTTPException(
             status_code=500, detail="書籍情報の取得中に予期しないエラーが発生しました"
         ) from exc
