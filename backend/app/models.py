@@ -24,22 +24,16 @@ class Book(Base):
 
 class Shelf(Base):
     __tablename__ = "shelves"
-    __table_args__ = (
-        UniqueConstraint("user_id", "name", name="uq_user_shelf_name"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_shelf_name"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     memo: Mapped[str | None] = mapped_column(Text())
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
 
@@ -47,7 +41,9 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    auth0_sub: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    auth0_sub: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -57,42 +53,28 @@ class User(Base):
 
 class UserBook(Base):
     __tablename__ = "user_books"
-    __table_args__ = (
-        UniqueConstraint("user_id", "book_id", name="uq_user_book"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "book_id", name="uq_user_book"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     book_id: Mapped[int] = mapped_column(
-        ForeignKey("books.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+        ForeignKey("books.id", ondelete="CASCADE"), nullable=False, index=True
     )
     note: Mapped[str | None] = mapped_column(Text())
     status: Mapped[str] = mapped_column(
-        String(20),
-        server_default=BookStatus.UNREAD.value,
-        nullable=False,
-        index=True
+        String(20), server_default=BookStatus.UNREAD.value, nullable=False, index=True
     )
     shelf_id: Mapped[int | None] = mapped_column(
-        ForeignKey("shelves.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True
+        ForeignKey("shelves.id", ondelete="SET NULL"), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-        index=True
+        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
-        nullable=False
+        nullable=False,
     )

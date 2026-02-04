@@ -1,6 +1,7 @@
 """
 書籍検索APIのレスポンススキーマ
 """
+
 from pydantic import BaseModel
 
 

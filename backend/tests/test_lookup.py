@@ -49,10 +49,7 @@ def test_lookup_book_by_isbn_not_found(client, monkeypatch):
 
     # Google Books APIが404を返すケース
     def mock_fetch_book_by_isbn(isbn: str):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Book not found for ISBN: {isbn}"
-        )
+        raise HTTPException(status_code=404, detail=f"Book not found for ISBN: {isbn}")
 
     monkeypatch.setattr(router, "fetch_book_by_isbn", mock_fetch_book_by_isbn)
 
@@ -87,8 +84,7 @@ def test_lookup_book_by_isbn_api_error(client, monkeypatch):
     # Google Books APIがAPI接続エラーで500を返すケース
     def mock_fetch_book_by_isbn(isbn: str):
         raise HTTPException(
-            status_code=500,
-            detail="Google Books APIへの接続に失敗しました"
+            status_code=500, detail="Google Books APIへの接続に失敗しました"
         )
 
     monkeypatch.setattr(router, "fetch_book_by_isbn", mock_fetch_book_by_isbn)

@@ -282,10 +282,7 @@ def test_random_books(client, book_factory):
     """
     # 5冊作成（デフォルトのPICKCOUNT=4より多く）
     for i in range(5):
-        book_factory(
-            title=f"ランダム本{i}",
-            isbn=f"978{i:010d}"
-        )
+        book_factory(title=f"ランダム本{i}", isbn=f"978{i:010d}")
 
     response = client.get("/books/random")
     assert response.status_code == 200
@@ -372,6 +369,7 @@ def test_create_book_without_shelf_id(client, admin_user, monkeypatch):
     """
     書誌情報のみ登録できることを確認
     """
+
     def mock_fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
         return GoogleBooksResponse(
             title="棚なし取得本",
@@ -436,7 +434,9 @@ def test_filter_books_by_shelf_id(client, admin_user, book_factory, shelf_factor
     assert book4.id not in book_ids
 
 
-def test_shelf_deletion_sets_book_shelf_id_to_null(client, admin_user, book_factory, shelf_factory, test_db):
+def test_shelf_deletion_sets_book_shelf_id_to_null(
+    client, admin_user, book_factory, shelf_factory, test_db
+):
     """
     棚を削除したときに書籍のshelf_idがNULLになることを確認
     """
