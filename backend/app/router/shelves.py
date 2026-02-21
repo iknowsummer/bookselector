@@ -11,7 +11,7 @@ from ..exceptions import handle_database_error, handle_internal_error
 router = APIRouter()
 
 
-@router.get("/shelves/", response_model=list[ShelfRead])
+@router.get("/shelves", response_model=list[ShelfRead])
 def read_shelves(current_user: CurrentUser, db: Session = Depends(get_db)):
     """棚一覧を取得 (user-scoped)"""
     shelves = (
@@ -36,7 +36,7 @@ def read_shelf(shelf_id: int, current_user: CurrentUser, db: Session = Depends(g
     return shelf
 
 
-@router.post("/shelves/", response_model=ShelfRead)
+@router.post("/shelves", response_model=ShelfRead)
 def create_shelf(
     shelf: ShelfCreate, current_user: CurrentUser, db: Session = Depends(get_db)
 ):
