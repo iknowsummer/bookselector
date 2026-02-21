@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["books.google.com"],
   },
-  instrumentationHook: true,
 };
 
 export default nextConfig;
