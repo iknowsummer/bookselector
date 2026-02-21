@@ -25,7 +25,12 @@ setup_logging(log_dir=str(log_dir))
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+enable_docs = os.getenv("ENABLE_DOCS", "").strip().lower() in ("1", "true")
+app = FastAPI(
+    docs_url="/docs" if enable_docs else None,
+    redoc_url="/redoc" if enable_docs else None,
+    openapi_url="/openapi.json" if enable_docs else None,
+)
 
 # アクセスログミドルウェア（最初に登録 = 最後に実行）
 app.add_middleware(AccessLogMiddleware)
