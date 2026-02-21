@@ -11,6 +11,7 @@ CLAUDE.md
 
 # environment
 .env
+!.env.sample
 
 # SSL certificates (development only)
 **/certs/
