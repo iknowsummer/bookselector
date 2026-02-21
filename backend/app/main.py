@@ -31,7 +31,12 @@ app = FastAPI()
 app.add_middleware(AccessLogMiddleware)
 
 # CORS設定
-cors_origins = os.getenv("BACKEND_CORS_ORIGINS", "").split(",")
+cors_origins_raw = os.getenv("BACKEND_CORS_ORIGINS", "")
+cors_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+
+if not cors_origins:
+    logger.warning("BACKEND_CORS_ORIGINS が未設定です。CORSリクエストはすべて拒否されます。")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,

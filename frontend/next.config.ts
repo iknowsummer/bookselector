@@ -1,12 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
   outputFileTracingRoot: __dirname,
   images: {
     domains: ["books.google.com"],
   },
-  instrumentationHook: true,
 };
 
 export default nextConfig;
