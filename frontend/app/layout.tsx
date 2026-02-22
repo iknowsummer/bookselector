@@ -18,22 +18,22 @@ export default async function RootLayout({
           <nav id="global-nav">
             <ul>
               <li>
-                <Link href="/">Home</Link>
+                <Link href="/">ホーム</Link>
               </li>
               {session && (
                 <li>
-                  <Link href="/books/new">New Book</Link>
+                  <Link href="/books/new">書籍登録</Link>
                 </li>
               )}
               <li>
-                <Link href="/books">Book List</Link>
+                <Link href="/books">書籍一覧</Link>
               </li>
               <li>
-                <Link href="/shelves">Shelves</Link>
+                <Link href="/shelves">書棚</Link>
               </li>
               {session && (
                 <li>
-                  <Link href="/dashboard">Dashboard</Link>
+                  <Link href="/dashboard">ダッシュボード</Link>
                 </li>
               )}
               <li>
