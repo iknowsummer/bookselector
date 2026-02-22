@@ -4,12 +4,12 @@ export default async function LoginStatus() {
   const session = await auth0.getSession();
 
   if (!session) {
-    return <a href="/auth/login">Login</a>;
+    return <a href="/auth/login">ログイン</a>;
   }
 
   return (
     <>
-      <a href="/auth/logout">Logout</a>
+      <a href="/auth/logout">ログアウト</a>;
     </>
   );
 }
