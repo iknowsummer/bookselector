@@ -13,7 +13,7 @@ from ..services.user_books import (
 router = APIRouter()
 
 
-@router.post("/user-books/", response_model=UserBookRead)
+@router.post("/user-books", response_model=UserBookRead)
 def create_user_book(
     payload: UserBookCreate,
     current_user: CurrentUser,

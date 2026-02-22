@@ -1,0 +1,25 @@
+/* ============================================
+   Icons: CSSマスクによるSVGアイコン
+   ============================================ */
+
+.icon::before {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  background-color: currentColor;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* --- 個別アイコン --- */
+
+.icon--book-add::before {
+  mask-image: url("/icons/book-add.svg");
+}

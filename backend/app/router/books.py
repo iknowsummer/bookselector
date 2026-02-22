@@ -70,7 +70,7 @@ def random_books(
         raise handle_internal_error(exc, "random book selection")
 
 
-@router.post("/books/", response_model=BookRead)
+@router.post("/books", response_model=BookRead)
 def create_book(
     book: BookCreate,
     current_user: CurrentUser,
@@ -105,7 +105,7 @@ def create_book(
         raise handle_database_error(exc, "book creation") from exc
 
 
-@router.get("/books/", response_model=list[BookRead])
+@router.get("/books", response_model=list[BookRead])
 def read_books(
     current_user: CurrentUser,
     db: Session = Depends(get_db),

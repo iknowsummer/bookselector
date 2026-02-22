@@ -4,7 +4,7 @@ import { authenticatedFetch } from "./authenticatedFetch";
 
 export const fetchShelves = async (): Promise<Shelf[]> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/`);
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves`);
   if (!res.ok) {
     throw new Error("棚情報の取得に失敗しました");
   }
@@ -25,7 +25,7 @@ export const fetchShelf = async (id: number): Promise<Shelf> => {
 
 export const createShelf = async (formData: ShelfFormData): Promise<Shelf> => {
   const apiBaseUrl = getApiBaseUrl();
-  const res = await authenticatedFetch(`${apiBaseUrl}/shelves/`, {
+  const res = await authenticatedFetch(`${apiBaseUrl}/shelves`, {
     method: "POST",
     body: JSON.stringify(formData),
   });

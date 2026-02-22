@@ -12,6 +12,9 @@
 /* UI Elements: ボタン、フォーム、入力要素 */
 @import './styles/ui-elements.css';
 
+/* Icons: CSSマスクによるSVGアイコン */
+@import './styles/icons.css';
+
 /* Components: Book/Shelf表示コンポーネント */
 @import './styles/components.css';
 
