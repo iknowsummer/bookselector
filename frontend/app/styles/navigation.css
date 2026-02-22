@@ -6,6 +6,8 @@
   margin-bottom: 2rem;
   border-bottom: 2px solid #e0e0e0;
   padding-bottom: 1rem;
+  display: flex;
+  align-items: center;
 
   ul {
     list-style: none;

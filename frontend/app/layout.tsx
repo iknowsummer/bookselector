@@ -16,15 +16,19 @@ export default async function RootLayout({
         <header>BookPit</header>
         <main>
           <nav id="global-nav">
+            {session && (
+              <Link
+                className="button button--lined icon icon--book-add"
+                href="/books/new"
+              >
+                書籍登録
+              </Link>
+            )}
+
             <ul>
               <li>
                 <Link href="/">ホーム</Link>
               </li>
-              {session && (
-                <li>
-                  <Link href="/books/new">書籍登録</Link>
-                </li>
-              )}
               <li>
                 <Link href="/books">書籍一覧</Link>
               </li>
