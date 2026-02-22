@@ -4,6 +4,8 @@ Google Books API連携モジュール
 ISBNから書籍情報を取得してGoogleBooksResponseスキーマに変換する
 """
 
+import os
+
 import requests
 from fastapi import HTTPException
 
@@ -31,6 +33,9 @@ def fetch_book_by_isbn(isbn: str) -> GoogleBooksResponse:
             "q": f"isbn:{isbn}",
             "maxResults": 1,
         }
+        api_key = os.getenv("GOOGLE_BOOKS_API_KEY")
+        if api_key:
+            params["key"] = api_key
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
 
