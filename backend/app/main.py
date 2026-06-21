@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from .database import Base, engine
@@ -34,21 +33,6 @@ app = FastAPI(
 
 # アクセスログミドルウェア（最初に登録 = 最後に実行）
 app.add_middleware(AccessLogMiddleware)
-
-# CORS設定
-cors_origins_raw = os.getenv("BACKEND_CORS_ORIGINS", "")
-cors_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
-
-if not cors_origins:
-    logger.warning("BACKEND_CORS_ORIGINS が未設定です。CORSリクエストはすべて拒否されます。")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # 初回起動時にDBテーブルを自動作成
