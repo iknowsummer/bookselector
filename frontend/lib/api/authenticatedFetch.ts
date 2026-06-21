@@ -1,44 +1,43 @@
-import { getServerAccessToken, getClientAccessToken } from "@/lib/auth/token";
+import { getServerAccessToken } from "@/lib/auth/token";
 
-/**
- * サーバーまたはクライアントで実行中かを判定
- */
 function isServer(): boolean {
   return typeof window === "undefined";
 }
 
 /**
- * 認証付きfetchラッパー - Authorizationヘッダーを自動追加
+ * fetch ラッパー。
  *
- * Server Componentでの使用例:
- *   const data = await authenticatedFetch("/books");
+ * サーバ側（Server Component / Route Handler 内）では `getServerAccessToken()`
+ * で Auth0 アクセストークンを取得し `Authorization: Bearer ...` を付与する。
  *
- * Client Componentでの使用例:
- *   const data = await authenticatedFetch("/books", { method: "POST", ... });
+ * ブラウザ側（Client Component）からは同一オリジンの `/api/*` を叩く構成のため、
+ * トークン付与は Next.js の Route Handler 側に集約されている。ここではトークンを
+ * 付けずに同一オリジン fetch をそのまま実行する（Cookie ベースのセッションで
+ * Route Handler 側がユーザーを特定する）。
+ *
+ * 使用例（Server Component）:
+ *   const data = await authenticatedFetch(`${apiBaseUrl}/books`);
+ *
+ * 使用例（Client Component）:
+ *   const data = await authenticatedFetch("/api/books", { method: "POST", ... });
  */
 export async function authenticatedFetch(
   url: string,
   options?: RequestInit,
 ): Promise<Response> {
-  // コンテキストに基づいてトークンを取得
-  const accessToken = isServer()
-    ? await getServerAccessToken()
-    : await getClientAccessToken();
-
-  // 認証付きヘッダーを構築
   const headers = new Headers(options?.headers);
 
-  // JSON API用にContent-Typeを常に設定
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  // トークンがあればAuthorizationヘッダーを追加
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+  if (isServer()) {
+    const accessToken = await getServerAccessToken();
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
+    }
   }
 
-  // 拡張ヘッダーでリクエストを実行
   return fetch(url, {
     ...options,
     headers,
