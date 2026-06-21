@@ -7,13 +7,15 @@ services:
     volumes:
       - ./data:/data
       - ./backend/logs:/app/logs
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     restart: unless-stopped
 
   frontend:
     build: ./frontend
     env_file: ./frontend/.env
+    environment:
+      BACKEND_API_URL: http://backend:8000
     ports:
       - "3000:3000"
     depends_on:
