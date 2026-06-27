@@ -13,6 +13,7 @@ const proc = spawn("uv", [
   cwd: "backend",
   stdio: "inherit",
   shell: true,
+  env: { ...process.env, ENABLE_DOCS: "1" },
 });
 
 proc.on("close", (code) => {
