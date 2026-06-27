@@ -9,7 +9,7 @@ export default async function LoginStatus() {
 
   return (
     <>
-      <a href="/auth/logout">ログアウト</a>;
+      <a href="/auth/logout">ログアウト</a>
     </>
   );
 }
